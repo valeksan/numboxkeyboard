@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>components/ButtonB.qml</file>
+        <file>components/ButtonD.qml</file>
+        <file>components/Clipboard.qml</file>
+        <file>components/NumBoxKeyboard.qml</file>
+    </qresource>
+</RCC>
