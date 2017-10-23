@@ -30,7 +30,7 @@ Button {
                 else  return (control.on ? (control.down ? Qt.darker(control.backgroundColorOn,1.5):control.backgroundColorOn) : (control.down ? Qt.darker(control.backgroundColorOff,1.5) : control.backgroundColorOff));
             }
         }
-        color: getColor() //control.on ? (control.down ? Qt.darker(control.backgroundColorOn,1.5) : control.backgroundColorOn) : (control.down ? Qt.darker(control.backgroundColorOff,1.5) : control.backgroundColorOff)
+        color: getColor()
         radius: control.radius
         border.color: Qt.darker(color, 1.5)
     }

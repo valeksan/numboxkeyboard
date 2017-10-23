@@ -112,13 +112,9 @@ Item {
     function pastValue() {
         if(clipboardHelper.canPast()) {
             var buffer = clipboardHelper.past();
-            console.log(buffer)
             var conv_text = toPosixTextValue(buffer);
-            console.log(conv_text)
             var real_value = parseFloat(conv_text);
-            console.log(real_value)
             real_value = roundPlus(real_value, precision);
-            console.log(real_value)
             if(real_value >= minimumValue && real_value <= maximumValue) {
                 value = getAbsValueStr(real_value.toString());
                 flag_minus = (real_value < 0);
@@ -381,10 +377,37 @@ Item {
     }
     // -------------------------------------------------------------------------------------------------------------
 
-    Clipboard {
-    	// Интерфейс для работы с буфером обмена
+    Item {
         id: clipboardHelper
-    }    
+        opacity: 0
+        property alias buffer: helper.text
+        function copy(text) {
+            buffer = text;
+            helper.selectAll();
+            helper.copy();
+        }
+        function cut(text) {
+            buffer = text;
+            helper.selectAll();
+            helper.cut()
+        }
+        function canPast() {
+            return helper.canPaste
+        }
+        function past() {
+            if(helper.canPaste) {
+                buffer = " "
+                helper.selectAll()
+                helper.paste();
+                return buffer;
+            }
+            return ""
+        }
+        TextEdit {
+            id: helper
+            text: ""
+        }
+    }
     Rectangle {
     	// Тень
         id: dialogMsgShadow
@@ -421,6 +444,7 @@ Item {
                 enabled: (value.length > 0) || (placeholderSafeValue.length > 0)
                 onTriggered: {
                     copyValue();
+                    dialogPanel.forceActiveFocus()
                 }
             }
             MenuItem {
@@ -428,6 +452,7 @@ Item {
                 enabled: clipboardHelper.canPast()
                 onTriggered: {
                     pastValue();
+                    dialogPanel.forceActiveFocus()
                 }
             }
         }
@@ -510,7 +535,7 @@ Item {
                 width: contentDialogPanel.width+2
                 height: contentDialogPanel.height*0.625
                 spacing: -1
-                ButtonB {
+                KeyButton {
                     id: areaCClearFront
                     height: 0.125*contentDialogPanel.height
                     width: 0.3333333*contentDialogPanel.width
@@ -534,7 +559,7 @@ Item {
                         trigger_clear = false
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaCClear
                     height: 0.125*contentDialogPanel.height
                     width: 0.3333333*contentDialogPanel.width
@@ -552,7 +577,7 @@ Item {
                         flag_minus = func_autoselect_flag_minus()
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaCClearBack
                     height: 0.125*contentDialogPanel.height
                     width: 0.3333333*contentDialogPanel.width
@@ -572,7 +597,7 @@ Item {
                         }
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaC7
                     text: "7"
                     height: 0.125*contentDialogPanel.height
@@ -589,7 +614,7 @@ Item {
                         putSymbol('7');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaC8
                     text: "8"
                     height: 0.125*contentDialogPanel.height
@@ -606,7 +631,7 @@ Item {
                         putSymbol('8');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaC9
                     text: "9"
                     height: 0.125*contentDialogPanel.height
@@ -623,7 +648,7 @@ Item {
                         putSymbol('9');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaC4
                     text: "4"
                     height: 0.125*contentDialogPanel.height
@@ -640,7 +665,7 @@ Item {
                         putSymbol('4');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaC5
                     text: "5"
                     height: 0.125*contentDialogPanel.height
@@ -657,7 +682,7 @@ Item {
                         putSymbol('5');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaC6
                     text: "6"
                     height: 0.125*contentDialogPanel.height
@@ -674,7 +699,7 @@ Item {
                         putSymbol('6');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaC1
                     text: "1"
                     height: 0.125*contentDialogPanel.height
@@ -691,7 +716,7 @@ Item {
                         putSymbol('1');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaC2
                     text: "2"
                     height: 0.125*contentDialogPanel.height
@@ -708,7 +733,7 @@ Item {
                         putSymbol('2');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaC3
                     text: "3"
                     height: 0.125*contentDialogPanel.height
@@ -725,7 +750,7 @@ Item {
                         putSymbol('3');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaC0
                     text: "0"
                     height: 0.125*contentDialogPanel.height
@@ -742,7 +767,7 @@ Item {
                         putSymbol('0');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaCDote
                     text: getSystemLocaleDecimalChar()//"."
                     height: 0.125*contentDialogPanel.height
@@ -759,7 +784,7 @@ Item {
                         putSymbol('.');
                     }
                 }
-                ButtonB {
+                KeyButton {
                     id: areaCMinus
                     text: "+/-"
                     height: 0.125*contentDialogPanel.height
@@ -781,10 +806,9 @@ Item {
                 id: rowFinishEditButtons
                 height: 0.125*contentDialogPanel.height
                 width: contentDialogPanel.width+1
-                //padding: 0
                 spacing: -1
                 anchors.horizontalCenter: parent.horizontalCenter
-                ButtonD {
+                DialogButton {
                     id: btOK
                     color: "white"
                     backgroundColorOn: color
@@ -798,7 +822,7 @@ Item {
                         hide();
                     }
                 }
-                ButtonD {
+                DialogButton {
                     id: btCancel
                     color: "white"
                     backgroundColorOn: color
