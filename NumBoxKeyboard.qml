@@ -535,7 +535,7 @@ Item {
                 width: contentDialogPanel.width+2
                 height: contentDialogPanel.height*0.625
                 spacing: -1
-                KeyButton {
+                ButtonKey {
                     id: areaCClearFront
                     height: 0.125*contentDialogPanel.height
                     width: 0.3333333*contentDialogPanel.width
@@ -559,7 +559,7 @@ Item {
                         trigger_clear = false
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaCClear
                     height: 0.125*contentDialogPanel.height
                     width: 0.3333333*contentDialogPanel.width
@@ -577,7 +577,7 @@ Item {
                         flag_minus = func_autoselect_flag_minus()
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaCClearBack
                     height: 0.125*contentDialogPanel.height
                     width: 0.3333333*contentDialogPanel.width
@@ -597,7 +597,7 @@ Item {
                         }
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaC7
                     text: "7"
                     height: 0.125*contentDialogPanel.height
@@ -614,7 +614,7 @@ Item {
                         putSymbol('7');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaC8
                     text: "8"
                     height: 0.125*contentDialogPanel.height
@@ -631,7 +631,7 @@ Item {
                         putSymbol('8');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaC9
                     text: "9"
                     height: 0.125*contentDialogPanel.height
@@ -648,7 +648,7 @@ Item {
                         putSymbol('9');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaC4
                     text: "4"
                     height: 0.125*contentDialogPanel.height
@@ -665,7 +665,7 @@ Item {
                         putSymbol('4');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaC5
                     text: "5"
                     height: 0.125*contentDialogPanel.height
@@ -682,7 +682,7 @@ Item {
                         putSymbol('5');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaC6
                     text: "6"
                     height: 0.125*contentDialogPanel.height
@@ -699,7 +699,7 @@ Item {
                         putSymbol('6');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaC1
                     text: "1"
                     height: 0.125*contentDialogPanel.height
@@ -716,7 +716,7 @@ Item {
                         putSymbol('1');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaC2
                     text: "2"
                     height: 0.125*contentDialogPanel.height
@@ -733,7 +733,7 @@ Item {
                         putSymbol('2');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaC3
                     text: "3"
                     height: 0.125*contentDialogPanel.height
@@ -750,7 +750,7 @@ Item {
                         putSymbol('3');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaC0
                     text: "0"
                     height: 0.125*contentDialogPanel.height
@@ -767,7 +767,7 @@ Item {
                         putSymbol('0');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaCDote
                     text: getSystemLocaleDecimalChar()//"."
                     height: 0.125*contentDialogPanel.height
@@ -784,7 +784,7 @@ Item {
                         putSymbol('.');
                     }
                 }
-                KeyButton {
+                ButtonKey {
                     id: areaCMinus
                     text: "+/-"
                     height: 0.125*contentDialogPanel.height
@@ -808,7 +808,7 @@ Item {
                 width: contentDialogPanel.width+1
                 spacing: -1
                 anchors.horizontalCenter: parent.horizontalCenter
-                DialogButton {
+                ButtonDlg {
                     id: btOK
                     color: "white"
                     backgroundColorOn: color
@@ -822,7 +822,7 @@ Item {
                         hide();
                     }
                 }
-                DialogButton {
+                ButtonDlg {
                     id: btCancel
                     color: "white"
                     backgroundColorOn: color

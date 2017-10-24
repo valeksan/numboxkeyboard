@@ -2,7 +2,7 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>components/NumBoxKeyboard.qml</file>
-        <file>components/KeyButton.qml</file>
-        <file>components/DialogButton.qml</file>
+        <file>components/ButtonDlg.qml</file>
+        <file>components/ButtonKey.qml</file>
     </qresource>
 </RCC>
