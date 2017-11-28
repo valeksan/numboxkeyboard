@@ -34,9 +34,10 @@ Window {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    if(!num_keyboard.isVisible()) {
-                        num_keyboard.placeholderValue = textEdit.text
-                        num_keyboard.show()
+                    if(!num_keyboard.isVisible()) {                        
+                        //num_keyboard.show(); // и так можно!
+                        //num_keyboard.show(1.8); // и так можно!
+                        num_keyboard.show("1.6");
                     }
                 }
             }
@@ -48,6 +49,7 @@ Window {
         minimumValue: -124.124
         maximumValue: 124.124
         precision: 3
+        placeholderValue: textEdit.text
         //enableSequenceGrid: true // если захочится пременить шаговую сетку
         //sequenceStep: 0.004 // шаг сетки (любой)
         anchors.fill: parent

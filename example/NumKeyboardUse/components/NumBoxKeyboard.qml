@@ -21,6 +21,7 @@ Item {
 
     /* Старое значение (слегка видно перед вводом первого символа) */
     property string placeholderValue: ""
+    property bool flagCurrentValueSetted: false
 
     /* Вид */
     property alias radius: dialogPanel.radius
@@ -54,14 +55,19 @@ Item {
 
     /* Главные методы */
     // показать окно ввода
-    function show() {
-        value = "";
+    function show(numberStr) {
+        var tmpValue = numberStr ? getAbsValueStr(numberStr) : ""
         dialogPanel.visible = true;
-        dialog.flag_minus = func_autoselect_flag_minus();
+        if(tmpValue) {
+            value = toPosixTextValue(tmpValue);
+            dialog.flag_minus = (parseFloat(numberStr) < 0);
+        }
     }
     // скрыть окно ввода
     function hide() {
-        dialogPanel.visible = false
+        dialogPanel.visible = false;
+        flagCurrentValueSetted = false;
+        value = "";
     }
     // очистить ввод
     function clear() {
@@ -70,12 +76,12 @@ Item {
     // окно ввода открыто
     function isVisible() {
         return dialogPanel.visible;
-    }
+    }    
 
     // -------------------------------------------------------------------------------------------------------------
 
     /* Системные параметры */
-    property string placeholderSafeValue: getPlaceholderValueSafe(placeholderValue)
+    property string placeholderSafeValue: getPlaceholderValueSafe()
     property bool flag_minus: false // используется для запоминания знака 
     property string value: "" // Абсолютное введеное значение(без знака)
     property string displayValue: flag_minus ? getValueStr(toLocaleTextValue(value)) : getValueStr(toLocaleTextValue(value)); // Отображаемое значение ввода на дисплее
@@ -326,6 +332,7 @@ Item {
         } else {
             strValue = strValue.replace(',', doteSymbol)
         }
+        //console.log(strValue)
         return strValue;
     }
     // Символ является числом
@@ -433,7 +440,7 @@ Item {
             if(visible === true) {
                 Keys.enabled = true
             }
-            dialog.value = ""
+            //dialog.value = "" // ЭТО ЗЛОЙ КОСТЫЛЬ, КОТОРЫЙ ДОЛГО МЕНЯ ВЫМАТЫВАЛ КОГДА ДЕБАЖИЛ, НИКОГДА ТАК НЕ ДЕЛАЙ В БУДУЮЩЕМ! >:O
             dialogPanel.forceActiveFocus()
         }
 
@@ -503,8 +510,8 @@ Item {
                         anchors.fill: parent
                         verticalAlignment: "AlignVCenter"
                         horizontalAlignment: "AlignHCenter"
-                        text: value.length > 0 ? displayValue : placeholderValue
-                        color: value.length > 0 ? "black" : "gray"
+                        text: dialog.value.length > 0 ? displayValue : placeholderValue
+                        color: dialog.value.length > 0 ? "black" : "gray"
                         font.pixelSize: displayTextDisplay.height*0.65
                     }
                     MouseArea {
