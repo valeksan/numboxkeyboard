@@ -20,7 +20,7 @@ Window {
 
     TextEdit {
         id: textEdit
-        text: "0.0"
+        text: "000"
         verticalAlignment: Text.AlignVCenter
         anchors.top: title.bottom
         anchors.horizontalCenter: parent.horizontalCenter
@@ -37,7 +37,7 @@ Window {
                     if(!num_keyboard.isVisible()) {                        
                         //num_keyboard.show(); // и так можно!
                         //num_keyboard.show(1.8); // и так можно!
-                        num_keyboard.show("1.6");
+                        num_keyboard.show(textEdit.text);
                     }
                 }
             }
@@ -46,9 +46,10 @@ Window {
 
     Components.NumBoxKeyboard {
         id: num_keyboard
-        minimumValue: -124.124
-        maximumValue: 124.124
-        precision: 3
+        minimumValue: 0
+        maximumValue: 999
+        precision: 0
+        decimals: 3
         placeholderValue: textEdit.text
         //enableSequenceGrid: true // если захочится пременить шаговую сетку
         //sequenceStep: 0.004 // шаг сетки (любой)

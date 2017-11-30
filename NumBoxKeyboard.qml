@@ -35,6 +35,7 @@ Item {
 
     /* Точность */
     property int precision: 0
+    property int decimals: 0
 
     /* Пределы ввода */
     property double minimumValue: -Number.MAX_VALUE/2
@@ -298,7 +299,21 @@ Item {
     /* Системные вспомогательные методы */    
     // Получить строку числа со знаком
     function getValueStr(arg) {
-        return ((!flag_minus) ? arg : ("-"+arg));
+        var valueStr;
+        var countD = 0;
+        valueStr = ((!flag_minus) ? arg : ("-"+arg));
+        if(decimals > 0 && minimumValue >= 0) {
+            var i;
+            for(i=0; i<valueStr.length; i++) {
+                if(isNumericChar(valueStr[i])) {
+                    countD += 1;
+                } else break;
+            }
+            for(i=0; i<(decimals-countD); i++) {
+                valueStr = "0" + valueStr;
+            }
+        }
+        return valueStr; //((!flag_minus) ? arg : ("-"+arg));
     }
     // Получить строку числа без знака
     function getAbsValueStr(arg) {
