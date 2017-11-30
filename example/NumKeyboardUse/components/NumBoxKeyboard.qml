@@ -58,8 +58,21 @@ Item {
     // показать окно ввода
     function show(numberStr) {
         var tmpValue = numberStr ? getAbsValueStr(numberStr) : ""
+        var countD = 0;
         dialogPanel.visible = true;
-        if(tmpValue) {
+        if(tmpValue) {            
+            if(decimals > 0 && minimumValue >= 0) {
+                var i;
+                for(i=0; i<tmpValue.length; i++) {
+                    if(tmpValue[i] === '0') {
+                        countD += 1;
+                    } else break;
+                }
+                if(countD === tmpValue.length) countD -= 1;
+                for(i=0; i<countD; i++) {
+                    tmpValue = tmpValue.substring(1);
+                }
+            }
             value = toPosixTextValue(tmpValue);
             dialog.flag_minus = (parseFloat(numberStr) < 0);
         }
