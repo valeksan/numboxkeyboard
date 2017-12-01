@@ -21,6 +21,9 @@ Button {
     implicitHeight: height
     implicitWidth: width
 
+    signal pressed
+    signal released
+
     background: Rectangle {
         function getColor() {
             if(!enableOnPressIndicate) {
@@ -49,9 +52,19 @@ Button {
     }
 
     onPressed: {
-        trigger_press = true
+        trigger_press = true;
+
     }
     onReleased: {
-        trigger_press = false
+        trigger_press = false;
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.NoButton
+        onExited: {
+            if(trigger_press) trigger_press = false;
+        }
     }
 }

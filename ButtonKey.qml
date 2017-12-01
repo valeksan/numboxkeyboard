@@ -13,7 +13,7 @@ Rectangle {
     color: "#f7a363"
     property color colorOff: color
     property color colorOn: Qt.lighter(color, 1.5)
-    property color colorDimmed: Qt.darker(color, 1.5)
+    property color colorDimmed: Qt.darker(colorOff, 1.5)
 
     property color textColor: "black"
     property color textColorOn: textColor
