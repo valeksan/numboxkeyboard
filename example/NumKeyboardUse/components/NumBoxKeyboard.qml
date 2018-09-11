@@ -54,7 +54,7 @@ Item {
     property double sequenceStep: 0.5
 
     /* Сигналы */
-    signal ok(var number); 	// сигнал посылается когда нажимаем кнопку 'ВВОД' и закрываем слой (если кнопка разблокирована условием непустого ввода)
+    signal ok(var number, var equal); 	// сигнал посылается когда нажимаем кнопку 'ВВОД' и закрываем слой (если кнопка разблокирована условием непустого ввода)
     signal cancel();		// сигнал посылается когда нажимаем кнопку 'ОТМЕНА' и закрываем слой 
 
     /* Главные методы */
@@ -93,7 +93,7 @@ Item {
     // окно ввода открыто
     function isVisible() {
         return dialogPanel.visible;
-    }    
+    }
 
     // -------------------------------------------------------------------------------------------------------------
 
@@ -313,6 +313,10 @@ Item {
     // -------------------------------------------------------------------------------------------------------------
 
     /* Системные вспомогательные методы */    
+    // функция проверки, что введеное значение отлично от старого
+    function isPlaceholderEqual() {
+        return (dialog.displayValue === dialog.placeholderValue);
+    }
     // Получить строку числа со знаком
     function getValueStr(arg) {
         var valueStr;
@@ -528,7 +532,8 @@ Item {
                 id: rowDisplayPanel
                 width: contentDialogPanel.width
                 height: contentDialogPanel.height*0.15
-                anchors.horizontalCenter: parent.horizontalCenter
+                //anchors.horizontalCenter: parent.horizontalCenter
+                Layout.alignment: Qt.AlignHCenter
                 // Область индикатора ввода
                 Rectangle {
                     id: displayTextDisplay
@@ -554,7 +559,7 @@ Item {
                             serviceMenu.open()
                         }
                         onClicked: {
-                            if(mouse.button == Qt.RightButton) {
+                            if(mouse.button === Qt.RightButton) {
                                 serviceMenu.x = textArea.mouseX
                                 serviceMenu.y = textArea.mouseY
                                 serviceMenu.open()
@@ -569,7 +574,8 @@ Item {
                 columns: 3
                 padding: 0
                 rows: 5
-                anchors.horizontalCenter: parent.horizontalCenter
+                //anchors.horizontalCenter: parent.horizontalCenter
+                Layout.alignment: Qt.AlignHCenter
                 width: contentDialogPanel.width+2
                 height: contentDialogPanel.height*0.625
                 spacing: -1
@@ -860,7 +866,8 @@ Item {
                 height: 0.125*contentDialogPanel.height
                 width: contentDialogPanel.width+1
                 spacing: -1
-                anchors.horizontalCenter: parent.horizontalCenter
+                //anchors.horizontalCenter: parent.horizontalCenter
+                Layout.alignment: Qt.AlignHCenter
                 ButtonDlg {
                     id: btOK
                     color: buttonsColorDlgOn
@@ -871,7 +878,7 @@ Item {
                     width: parent.width/2
                     enabled: (value.length > 0)
                     onClicked: {                        
-                        dialog.ok(getValueStr(value));
+                        dialog.ok(getValueStr(value), isPlaceholderEqual());
                         hide();
                     }
                 }
@@ -944,7 +951,7 @@ Item {
                 trigger_ftsp = true
             }
             else if((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && (value.length > 0) ) {
-                dialog.ok(getValueStr(value));
+                dialog.ok(getValueStr(value), isPlaceholderEqual());
                 hide();
             }
             else if(event.key === Qt.Key_Space) {
