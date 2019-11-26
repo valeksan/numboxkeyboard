@@ -14,8 +14,8 @@ Item {
     property alias dialogWidth: dialogPanel.width
 
     /* Заголовок и измерение */
-    property string label: "Breasts" // "some text label"
-    property string measurement: "Kg" // "Hz" or "Kg" or "Mbyte" or ...
+    property string label: "test" // "some text label"
+    property string measurement: " Kg" // "Hz" or "Kg" or "Mbyte" or ...
 
     /* Старое значение (слегка видно перед вводом первого символа) */
     property string placeholderValue: ""
@@ -27,6 +27,8 @@ Item {
     property alias border: dialogPanel.border
     property alias dialogOpacity: dialogPanel.opacity
     property color displayBackground: "#f1f3f1"
+    property color displayTextColor: "black"
+    property color displayPlaceholderTextColor: "gray"
     property color buttonsColors: "#f7a363"
     property color buttonsColorsOff: buttonsColors
     property color buttonsColorsOn: Qt.lighter(buttonsColorsOff, 1.2)
@@ -550,8 +552,8 @@ Item {
                         anchors.fill: parent
                         verticalAlignment: "AlignVCenter"
                         horizontalAlignment: "AlignHCenter"
-                        text: dialog.value.length > 0 ? displayValue : placeholderValue
-                        color: dialog.value.length > 0 ? "black" : "gray"
+                        text: dialog.value.length > 0 ? displayValue + measurement : placeholderValue + measurement
+                        color: dialog.value.length > 0 ? displayTextColor : displayPlaceholderTextColor
                         font.pixelSize: displayTextDisplay.height*0.65
                     }
                     MouseArea {
