@@ -33,6 +33,12 @@ Item {
     property color buttonsColorsDimmed: Qt.darker(buttonsColorsOff, 1.5)
     property color buttonsColorDlgOn: "white"
     property color buttonsColorDlgOff: Qt.darker(buttonsColorDlgOn, 1.2)
+    property color buttonsTextColors: "black"
+    property color buttonsTextColorsOff: buttonsTextColors
+    property color buttonsTextColorsOn: Qt.lighter(buttonsColorsOff, 1.5)
+    property color buttonsTextColorDlg: "black"
+    property color buttonsTextColorDlgOn: Qt.lighter(buttonsTextColorDlg, 1.5)
+    property color buttonsTextColorDlgOff: buttonsTextColorDlg
 
     /* Точность */
     property int precision: 0
@@ -584,6 +590,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     text: "#"
                     state: trigger_ftsp ? "on" : "off"
                     enableOnPressIndicate: false
@@ -609,6 +617,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     text: "C"
                     state: isBtSymbolCorrect('C') ? (trigger_clear ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
@@ -628,6 +638,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     text: "<-"
                     state: isBtSymbolCorrect('<') ? (trigger_bksp ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
@@ -650,6 +662,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('7') ? (trigger_7 ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -668,6 +682,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('8') ? (trigger_8 ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -686,6 +702,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('9') ? (trigger_9 ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -704,6 +722,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('4') ? (trigger_4 ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -722,6 +742,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('5') ? (trigger_5 ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -740,6 +762,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('6') ? (trigger_6 ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -758,6 +782,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('1') ? (trigger_1 ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -776,6 +802,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('2') ? (trigger_2 ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -794,6 +822,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('3') ? (trigger_3 ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -812,6 +842,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('0') ? (trigger_0 ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -830,6 +862,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('.') ? (trigger_dote ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -848,6 +882,8 @@ Item {
                     colorOn: buttonsColorsOn
                     colorOff: buttonsColorsOff
                     colorDimmed: buttonsColorsDimmed
+                    textColorOff: buttonsTextColorsOff
+                    textColorOn: buttonsTextColorsOn
                     state: isBtSymbolCorrect('-') ? (trigger_minus ? "on" : "off") : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
@@ -871,6 +907,9 @@ Item {
                     color: buttonsColorDlgOn
                     backgroundColorOn: buttonsColorDlgOn
                     backgroundColorOff: buttonsColorDlgOff
+                    textColor: buttonsTextColorDlg
+                    textColorOff: buttonsTextColorDlgOff
+                    textColorOn: buttonsColorDlgOn
                     text: textBtOK
                     height: parent.height
                     width: parent.width/2
@@ -885,6 +924,9 @@ Item {
                     color: buttonsColorDlgOn
                     backgroundColorOn: buttonsColorDlgOn
                     backgroundColorOff: buttonsColorDlgOff
+                    textColor: buttonsTextColorDlg
+                    textColorOff: buttonsTextColorDlgOff
+                    textColorOn: buttonsColorDlgOn
                     text: textBtCancel
                     height: parent.height
                     width: parent.width/2
