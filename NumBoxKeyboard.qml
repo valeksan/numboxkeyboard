@@ -15,6 +15,7 @@ Item {
 
     /* Заголовок и измерение */
     property string label: "test" // "some text label"
+    property alias labelFont: labelDialog.font
     property string measurement: " Kg" // "Hz" or "Kg" or "Mbyte" or ...
 
     /* Старое значение (слегка видно перед вводом первого символа) */
@@ -65,7 +66,9 @@ Item {
 
     /* Главные методы */
     // показать окно ввода
-    function show(numberStr) {
+    function show(numberStr, is_placeholder) {
+        if (typeof(is_placeholder) === 'undefined') is_placeholder = true;
+        if (typeof(numberStr) === 'undefined') numberStr = "";
         var tmpValue = numberStr ? getAbsValueStr(numberStr) : ""
         var countD = 0;
         dialogPanel.visible = true;
@@ -522,7 +525,7 @@ Item {
                 width: parent.width
                 spacing: 0
                 // Область заголовка
-                Text {
+                Label {
                     id: labelDialog
                     width: parent.width
                     height: 0.1*contentDialogPanel.height
