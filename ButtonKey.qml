@@ -11,6 +11,8 @@ Rectangle {
 
     //property color name: value
     color: "#f7a363"
+    antialiasing: true
+    clip: true
     property color colorOff: color
     property color colorOn: Qt.lighter(color, 1.5)
     property color colorDimmed: Qt.darker(colorOff, 1.5)

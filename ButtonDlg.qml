@@ -20,6 +20,7 @@ Button {
     width: 180
     implicitHeight: height
     implicitWidth: width
+    antialiasing: true
 
     signal pressed
     signal released

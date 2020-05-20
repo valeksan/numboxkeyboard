@@ -6,6 +6,7 @@ Window {
     width: 640
     height: 480
     title: qsTr("Пример ввода")
+    contentItem.antialiasing: true
 
     Text {
         id: title
@@ -32,22 +33,23 @@ Window {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    if(!num_keyboard.isVisible()) {                        
+                    if(!num_keyboard.isVisible()) {
                         //num_keyboard.show(); // и так можно!
                         //num_keyboard.show(1.8); // и так можно!
                         num_keyboard.show(textEdit.text);
                     }
                 }
             }
-        }        
+        }
     }
 
     NumBoxKeyboard {
         id: num_keyboard
-        minimumValue: 0
-        maximumValue: 999
+        minimumValue: 40
+        maximumValue: 300
         precision: 0
         decimals: 3
+        antialiasing: true
         placeholderValue: textEdit.text
         //enableSequenceGrid: true // если захочится пременить шаговую сетку
         //sequenceStep: 0.004 // шаг сетки (любой)

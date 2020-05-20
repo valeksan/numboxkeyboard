@@ -1,12 +1,12 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.1
+import QtQuick 2.10
+import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 Item {
     id: dialog
 
     /* Минимальные размеры после которых начнется масштабирование на уменьшение панели ввода */
-    property int minimumDialogHeight: 455
+    property int minimumDialogHeight: getGoldenMin(600) //455
     property int minimumDialogWidth: 600
 
     /* Размеры 'окна диалога' (на чтение) */
@@ -52,17 +52,17 @@ Item {
     property double maximumValue: Number.MAX_VALUE/2
 
     /* Названия кнопок закрытия слоя (скрытия) */
-    property string textBtOK: "ВВОД" 
+    property string textBtOK: "ВВОД"
     property string textBtCancel: "ОТМЕНА"
 
-    /* Включение функции: сетка последовательности 
+    /* Включение функции: сетка последовательности
     (если значение не кратно sequenceStep то оно будет блокироваться на ввод кнопками) */
-    property bool enableSequenceGrid: false // 
+    property bool enableSequenceGrid: false //
     property double sequenceStep: 0.5
 
     /* Сигналы */
     signal ok(var number, var equal); 	// сигнал посылается когда нажимаем кнопку 'ВВОД' и закрываем слой (если кнопка разблокирована условием непустого ввода)
-    signal cancel();		// сигнал посылается когда нажимаем кнопку 'ОТМЕНА' и закрываем слой 
+    signal cancel();		// сигнал посылается когда нажимаем кнопку 'ОТМЕНА' и закрываем слой
 
     /* Главные методы */
     // показать окно ввода
@@ -72,7 +72,7 @@ Item {
         var tmpValue = numberStr ? getAbsValueStr(numberStr) : ""
         var countD = 0;
         dialogPanel.visible = true;
-        if(tmpValue) {            
+        if(tmpValue) {
             if(decimals > 0 && minimumValue >= 0) {
                 var i;
                 for(i=0; i<tmpValue.length; i++) {
@@ -108,19 +108,26 @@ Item {
 
     /* Системные параметры */
     property string placeholderSafeValue: getPlaceholderValueSafe()
-    property bool flag_minus: false // используется для запоминания знака 
+    property bool flag_minus: false // используется для запоминания знака
     property string value: "" // Абсолютное введеное значение(без знака)
     property string displayValue: flag_minus ? getValueStr(toLocaleTextValue(value)) : getValueStr(toLocaleTextValue(value)); // Отображаемое значение ввода на дисплее
     // -------------------------------------------------------------------------------------------------------------
-    
+
     /* Системные методы масштабирования*/
     function fixScale() {
         if(dialog.height < minimumDialogHeight || dialog.width < minimumDialogWidth) {
             return Math.min(dialog.height/minimumDialogHeight, dialog.width/minimumDialogWidth);
         }
         return 1.0;
-    } 
-    // -------------------------------------------------------------------------------------------------------------   
+    }
+    function getGoldenMin(size) {
+        return size*514229.0/832040.0;
+    }
+
+    function getGoldenMax(size) {
+        return size*1.618033988749;
+    }
+    // -------------------------------------------------------------------------------------------------------------
 
     /* Системные методы ввода */
     // Ввести символ
@@ -163,17 +170,17 @@ Item {
     }
     // функция авто-выбора знака ввода по умолчанию (при показе панели)
     function func_autoselect_flag_minus() {
-    	if(minimumValue < 0 && maximumValue < 0) return true;
-    	if(minimumValue < 0 && maximumValue >= 0) {
-    		if(placeholderValue.length > 0) {
-				if(Math.floor(parseFloat(placeholderValue)) >= 0) return false;
-				else return true;
-    		} else {
-    			if(Math.abs(minimumValue*2/3) > maximumValue) return true;
-    			else return false;
-    		}
-    	}
-    	return false;
+        if(minimumValue < 0 && maximumValue < 0) return true;
+        if(minimumValue < 0 && maximumValue >= 0) {
+            if(placeholderValue.length > 0) {
+                if(Math.floor(parseFloat(placeholderValue)) >= 0) return false;
+                else return true;
+            } else {
+                if(Math.abs(minimumValue*2/3) > maximumValue) return true;
+                else return false;
+            }
+        }
+        return false;
     }
     // Получить защищенный вариант старого значения (исключает некорректный ввод при нажатии кнопки '#' )
     function getPlaceholderValueSafe() {
@@ -205,44 +212,52 @@ Item {
         }
         return false;
     }
+    // Проверка на диапазон
+    function isNumberInLimits() {
+        var new_value_str = value;
+        var real_value = ((flag_minus) ? -1*parseFloat(new_value_str) : parseFloat(new_value_str)); // получение проверяемого числа
+        if(isNaN(real_value)) return false;
+        if(real_value > maximumValue || real_value < minimumValue) return false;
+        return true;
+    }
     // Метод блокировки управляющих кнопок ввода (с предсказанием)
     function isBtSymbolCorrect(symbols) {
-    	var result = false;
-    	switch(symbols) {
-		// Alg 1. - проверка на диапазон, точность и кратность
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
-			if(value.length > 0) {
+        var result = false;
+        switch(symbols) {
+        // Alg 1. - проверка на диапазон, точность и кратность
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            if(value.length > 0) {
                 if(value.length > 2) {
-					// проверка на то что вводим целую часть
-					var index_pointer = value.indexOf('.');
+                    // проверка на то что вводим целую часть
+                    var index_pointer = value.indexOf('.');
                     //console.log(index_pointer)
-					if(~index_pointer) {
-						// символ найден, значит вводим дробную часть											
+                    if(~index_pointer) {
+                        // символ найден, значит вводим дробную часть
                         var fraction_precision_fact = (value.substring(index_pointer)).length-1; // фактическая точность по текущему вводу числа
-						// проверка на точность
-						if((fraction_precision_fact+1) > precision) {
-							// точность не соблюдена!
-							break;
-						}
-					}
-				}
-				// проверка на диапазон
-				var new_value_str = value + symbols;
-				var real_value = ((flag_minus) ? -1*parseFloat(new_value_str) : parseFloat(new_value_str)); // получение проверяемого числа
-				if(isNaN(real_value)) break;
-				if(real_value >= minimumValue && real_value <= maximumValue) {					
-					result = true;
-				} else break;
-				// если проверка на диапазон прошла успешно то проверка на кратность (если включена)
+                        // проверка на точность
+                        if((fraction_precision_fact+1) > precision) {
+                            // точность не соблюдена!
+                            break;
+                        }
+                    }
+                }
+                // проверка на диапазон
+                var new_value_str = value + symbols;
+                var real_value = ((flag_minus) ? -1*parseFloat(new_value_str) : parseFloat(new_value_str)); // получение проверяемого числа
+                if(isNaN(real_value)) break;
+                if(real_value <= maximumValue) {
+                    result = true;
+                } else break;
+                // если проверка на диапазон прошла успешно то проверка на кратность (если включена)
                 if(enableSequenceGrid) {
                     if(!isNumberInSequenceGrid(real_value,precision)) {
                         result = false; // получившееся значение не кратно шагу последовательности!
@@ -253,7 +268,7 @@ Item {
                 // проверка на диапазон
                 var real_value_1s = ((flag_minus) ? -1*parseFloat(symbols+".0") : parseFloat(symbols+".0")); // получение проверяемого числа
                 if(isNaN(real_value_1s)) break;
-                if(real_value_1s >= minimumValue && real_value_1s <= maximumValue) {
+                if(real_value_1s <= maximumValue) {
                     result = true;
                 } else break;
                 // если проверка на диапазон прошла успешно то проверка на кратность (если включена)
@@ -263,65 +278,66 @@ Item {
                     }
                 }
             }
-    		break;
-		// Alg 2.
-		case '.':
-			if(precision <= 0) break;
-			if(value.length > 0) {
+            break;
+        // Alg 2.
+        case '.':
+            if(precision <= 0) break;
+            if(value.length > 0) {
                 var index_pointer_2 = value.indexOf('.');
                 if(~index_pointer_2) {
-					// символ найден, второй не нужен!
-					break;
-				} else {                    
+                    // символ найден, второй не нужен!
+                    break;
+                } else {
                     // исключать точку в граничных значениях!
                     if(!isAddsPutDoteInLimitAtRange()) {
                         // входит в диапазон и не является граничным -> ввод точки
                         result = true;
                     }
-				}
-			} else {
-				// входит ли 0 в диапазон
+                }
+            } else {
+                // входит ли 0 в диапазон
                 if(0 >= minimumValue && 0 <= maximumValue) {
                     // исключать точку в граничных значениях!
                     if(!isAddsPutDoteInLimitAtRange()) {
                         // 0.0 входит в диапазон и не является граничным -> ввод точки с подстановкой символа '0' перед точкой
                         result = true;
                     }
-				} 
-			}
-			break;
-		// Alg 3.
-		case '-':
-            if(value.length > 0) {
+                }
+            }
+            break;
+        // Alg 3.
+        case '-':
+            if(minimumValue >= 0) result = false;
+            else if(value.length > 0) {
                 var real_value_3 = -1*parseFloat(value); // получение проверяемого числа
                 if(real_value_3 === 0) {
                     //break;
                     if(0 === minimumValue || 0 === maximumValue) break;
                 }
                 // проверка на диапазон
-                if(real_value_3 >= minimumValue && real_value_3 <= maximumValue) {
+                if(real_value_3 <= maximumValue) {
                     result = true;
                 } else break;
             }
-			break;
-		// Alg 4.
-		case '#':
+            break;
+        // Alg 4.
+        case '#':
             if(placeholderValue.length > 0) result = true;
-			break;
-		// Alg 5.
-		case 'C':
+            break;
+        // Alg 5.
+        case 'C':
             if(value.length > 0) result = true;
-			break;
-		// Alg 6.
-		case '<':
+            break;
+        // Alg 6.
+        case '<':
             if(value.length > 0) result = true;
-			break;
-    	}
-    	return result;
+            break;
+        }
+        return result;
     }
     // -------------------------------------------------------------------------------------------------------------
 
-    /* Системные вспомогательные методы */    
+    /* Системные вспомогательные методы */
     // функция проверки, что введеное значение отлично от старого
     function isPlaceholderEqual() {
         return (dialog.displayValue === dialog.placeholderValue);
@@ -352,13 +368,13 @@ Item {
             }
         }
         return arg;
-    }       
+    }
     // Получить символ разделителя целого числа от дробного в локализации среды
     function getSystemLocaleDecimalChar() {
         return Qt.locale("").decimalPoint;
-    }    
+    }
     // Преобразование числовой строки в формат posix (для преобразований с помощью javascript)
-    function toPosixTextValue(arg) {        
+    function toPosixTextValue(arg) {
         var doteSymbol = getSystemLocaleDecimalChar();
         var strValue = arg;
         if(doteSymbol !== '.') {
@@ -400,7 +416,7 @@ Item {
         if((valPr % valArgPr) === 0) {
             return true; // значение кратно шагу последовательности!
         }
-        return false; 
+        return false;
     }
     // Проверка факта ввода точки на границах диапазона ввода
     function isAddsPutDoteInLimitAtRange() {
@@ -460,17 +476,18 @@ Item {
         }
     }
     Rectangle {
-    	// Тень
+        // Тень
         id: dialogMsgShadow
         visible: dialogPanel.visible
         anchors.fill: parent
         color: Qt.darker("#c0ffffff", 1.5)
+        antialiasing: true
         MouseArea {
             anchors.fill: parent
-        }        
+        }
     }
     Rectangle {
-    	// Диалоговое окно ввода
+        // Диалоговое окно ввода
         id: dialogPanel
         anchors.centerIn: parent
         scale: fixScale()
@@ -484,7 +501,6 @@ Item {
             if(visible === true) {
                 Keys.enabled = true
             }
-            //dialog.value = "" // ЭТО ЗЛОЙ КОСТЫЛЬ, КОТОРЫЙ ДОЛГО МЕНЯ ВЫМАТЫВАЛ КОГДА ДЕБАЖИЛ, НИКОГДА ТАК НЕ ДЕЛАЙ В БУДУЮЩЕМ! >:O
             dialogPanel.forceActiveFocus()
         }
 
@@ -518,7 +534,7 @@ Item {
             height: parent.height
             width: parent.width
             spacing: 0
-            anchors.horizontalCenter: parent.horizontalCenter            
+            anchors.horizontalCenter: parent.horizontalCenter
             Row {
                 id: rowLabelPanel
                 height: 0.1*contentDialogPanel.height
@@ -541,7 +557,6 @@ Item {
                 id: rowDisplayPanel
                 width: contentDialogPanel.width
                 height: contentDialogPanel.height*0.15
-                //anchors.horizontalCenter: parent.horizontalCenter
                 Layout.alignment: Qt.AlignHCenter
                 // Область индикатора ввода
                 Rectangle {
@@ -583,7 +598,7 @@ Item {
                 columns: 3
                 padding: 0
                 rows: 5
-                //anchors.horizontalCenter: parent.horizontalCenter
+                antialiasing: true
                 Layout.alignment: Qt.AlignHCenter
                 width: contentDialogPanel.width+2
                 height: contentDialogPanel.height*0.625
@@ -604,10 +619,10 @@ Item {
                         trigger_ftsp = true
                     }
                     onReleased: {
-                        if(value.length > 0) {                            
+                        if(value.length > 0) {
                             clear();
                             flag_minus = func_autoselect_flag_minus();
-                        } else {                            
+                        } else {
                             value = getAbsValueStr(toPosixTextValue(placeholderSafeValue));
                             flag_minus = isPlaceholderSigned();
                         }
@@ -897,7 +912,7 @@ Item {
                     onReleased: {
                         trigger_minus = false;
                         flag_minus = !flag_minus;
-                    }                    
+                    }
                 }
             }
             RowLayout {
@@ -905,10 +920,10 @@ Item {
                 height: 0.125*contentDialogPanel.height
                 width: contentDialogPanel.width+1
                 spacing: -1
-                //anchors.horizontalCenter: parent.horizontalCenter
                 Layout.alignment: Qt.AlignHCenter
                 ButtonDlg {
                     id: btOK
+                    property bool allow: isNumberInLimits()
                     color: buttonsColorDlgOn
                     backgroundColorOn: buttonsColorDlgOn
                     backgroundColorOff: buttonsColorDlgOff
@@ -918,8 +933,8 @@ Item {
                     text: textBtOK
                     height: parent.height
                     width: parent.width/2
-                    enabled: (value.length > 0)
-                    onClicked: {                        
+                    enabled: (value.length > 0) && allow
+                    onClicked: {
                         dialog.ok(getValueStr(value), isPlaceholderEqual());
                         hide();
                     }
@@ -995,7 +1010,7 @@ Item {
             else if(event.key === Qt.Key_Delete) {
                 trigger_ftsp = true
             }
-            else if((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && (value.length > 0) ) {
+            else if((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && btOK.enabled ) {
                 dialog.ok(getValueStr(value), isPlaceholderEqual());
                 hide();
             }
@@ -1007,7 +1022,7 @@ Item {
                 }
             }
         }
-        Keys.onReleased: {            
+        Keys.onReleased: {
             if(event.key === Qt.Key_C && event.modifiers === Qt.ControlModifier) {
                 trigger_copy = false;
                 copyValue();
@@ -1080,11 +1095,11 @@ Item {
             }
             else if(event.key === Qt.Key_Space) {
                 if(isBtSymbolCorrect('#')) {
-                    if(value.length > 0) {                        
+                    if(value.length > 0) {
                         clear();
                         flag_minus = func_autoselect_flag_minus();
-                    } else {                        
-                        value = getAbsValueStr(toPosixTextValue(placeholderSafeValue));                        
+                    } else {
+                        value = getAbsValueStr(toPosixTextValue(placeholderSafeValue));
                         flag_minus = isPlaceholderSigned();
                     }
                 }
