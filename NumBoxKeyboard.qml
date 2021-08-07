@@ -5,24 +5,28 @@ import QtQuick.Layouts 1.3
 Item {
     id: dialog
 
-    /* Минимальные размеры после которых начнется масштабирование на уменьшение панели ввода */
-    property int minimumDialogHeight: getGoldenMin(600) //455
+    // The minimum dimensions after which the input panel will be scaled down
+    property int minimumDialogHeight: getGoldenMin(600) /* Default: golden ratio:) */
     property int minimumDialogWidth: 600
+    // ------------------------------------------------------------------------
 
-    /* Размеры 'окна диалога' (на чтение) */
+    // Dimensions of the 'dialog window' (for reading)
     property alias dialogHeight: dialogPanel.height
     property alias dialogWidth: dialogPanel.width
+    // ------------------------------------------------------------------------
 
-    /* Заголовок и измерение */
-    property string label: "test" // "some text label"
+    // Title and measurement
+    property string label: "test" /* Some text */
     property alias labelFont: labelDialog.font
-    property string measurement: " Kg" // "Hz" or "Kg" or "Mbyte" or ...
+    property string measurement: " Kg" /* "Hz" or "Kg" or "Mbyte" or ... */
+    // ------------------------------------------------------------------------
 
-    /* Старое значение (слегка видно перед вводом первого символа) */
+    // Old value (slightly visible before entering the first character)
     property string placeholderValue: ""
-    property bool flagCurrentValueSetted: false
+    property bool flagCurrentValueSetted: false /* control used, not editable! */
+    // ------------------------------------------------------------------------
 
-    /* Вид */
+    /* View settings */
     property alias radius: dialogPanel.radius
     property alias colorBackground: dialogPanel.color
     property alias border: dialogPanel.border
@@ -42,189 +46,240 @@ Item {
     property color buttonsTextColorDlg: "black"
     property color buttonsTextColorDlgOn: Qt.lighter(buttonsTextColorDlg, 1.5)
     property color buttonsTextColorDlgOff: buttonsTextColorDlg
+    // ------------------------------------------------------------------------
 
-    /* Точность */
+    // Precision settings
     property int precision: 0
     property int decimals: 0
+    // ------------------------------------------------------------------------
 
-    /* Пределы ввода */
+    // Input limits
     property double minimumValue: -Number.MAX_VALUE/2
     property double maximumValue: Number.MAX_VALUE/2
+    // ------------------------------------------------------------------------
 
-    /* Названия кнопок закрытия слоя (скрытия) */
+    // Layer close (hide) button names
     property string textBtOK: "ВВОД"
     property string textBtCancel: "ОТМЕНА"
+    // ------------------------------------------------------------------------
 
-    /* Включение функции: сетка последовательности
-    (если значение не кратно sequenceStep то оно будет блокироваться на ввод кнопками) */
-    property bool enableSequenceGrid: false //
+    // Feature enable: sequence grid
+    // (if the value is not a multiple of sequenceStep then it will be blocked
+    // for input by buttons)
+    property bool enableSequenceGrid: false
     property double sequenceStep: 0.5
+    // ------------------------------------------------------------------------
+    // Signals
+    signal ok(var number, var equal); /* The signal is sent when
+        we press the 'ENTER' button and close the layer
+        (if the button is unlocked by the condition of non-empty input) */
 
-    /* Сигналы */
-    signal ok(var number, var equal); 	// сигнал посылается когда нажимаем кнопку 'ВВОД' и закрываем слой (если кнопка разблокирована условием непустого ввода)
-    signal cancel();		// сигнал посылается когда нажимаем кнопку 'ОТМЕНА' и закрываем слой
+    signal cancel(); /* the signal is sent when we press
+        the 'CANCEL' button and close the layer */
+    // ------------------------------------------------------------------------
 
-    /* Главные методы */
-    // показать окно ввода
+    // Main methods
+    /* show input box */
     function show(numberStr, is_placeholder) {
-        if (typeof(is_placeholder) === 'undefined') is_placeholder = true;
-        if (typeof(numberStr) === 'undefined') numberStr = "";
-        var tmpValue = numberStr ? getAbsValueStr(numberStr) : ""
-        var countD = 0;
+        if (typeof(is_placeholder) === 'undefined')
+            is_placeholder = true;
+        if (typeof(numberStr) === 'undefined')
+            numberStr = "";
+        let tmpValue = numberStr ? dialog.getAbsValueStr(numberStr) : ""
+        let countD = 0;
         dialogPanel.visible = true;
-        if(tmpValue) {
-            if(decimals > 0 && minimumValue >= 0) {
-                var i;
-                for(i=0; i<tmpValue.length; i++) {
-                    if(tmpValue[i] === '0') {
+        if (tmpValue) {
+            if (dialog.decimals > 0 && dialog.minimumValue >= 0) {
+                let i;
+                for (i = 0; i < tmpValue.length; i++) {
+                    if (tmpValue[i] === '0') {
                         countD += 1;
                     } else break;
                 }
-                if(countD === tmpValue.length) countD -= 1;
-                for(i=0; i<countD; i++) {
+                if (countD === tmpValue.length)
+                    countD -= 1;
+                for (i = 0; i < countD; i++) {
                     tmpValue = tmpValue.substring(1);
                 }
             }
-            value = toPosixTextValue(tmpValue);
+            dialog.value = dialog.toPosixTextValue(tmpValue);
             dialog.flag_minus = (parseFloat(numberStr) < 0);
         }
     }
-    // скрыть окно ввода
+    /* hide input box */
     function hide() {
         dialogPanel.visible = false;
-        flagCurrentValueSetted = false;
-        value = "";
+        dialog.flagCurrentValueSetted = false;
+        dialog.value = "";
     }
-    // очистить ввод
+    /* clear input */
     function clear() {
-        value = "";
+        dialog.value = "";
     }
-    // окно ввода открыто
+    /* input window open state */
     function isVisible() {
         return dialogPanel.visible;
     }
+    // ------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------------------------------------------
+    // System settings
+    property string placeholderSafeValue: dialog.getPlaceholderValueSafe()
+    property bool flag_minus: false /* used to memorize the sign */
+    property string value: "" /* absolute entered value (unsigned) */
+    property string displayValue: dialog.flag_minus ?
+                                      dialog.getValueStr(dialog.toLocaleTextValue(dialog.value))
+                                    : dialog.getValueStr(dialog.toLocaleTextValue(dialog.value)); /*
+        Displayed input value on display */
+    // ------------------------------------------------------------------------
 
-    /* Системные параметры */
-    property string placeholderSafeValue: getPlaceholderValueSafe()
-    property bool flag_minus: false // используется для запоминания знака
-    property string value: "" // Абсолютное введеное значение(без знака)
-    property string displayValue: flag_minus ? getValueStr(toLocaleTextValue(value)) : getValueStr(toLocaleTextValue(value)); // Отображаемое значение ввода на дисплее
-    // -------------------------------------------------------------------------------------------------------------
-
-    /* Системные методы масштабирования*/
+    // System Scaling Methods
     function fixScale() {
-        if(dialog.height < minimumDialogHeight || dialog.width < minimumDialogWidth) {
-            return Math.min(dialog.height/minimumDialogHeight, dialog.width/minimumDialogWidth);
+        if (dialog.height < dialog.minimumDialogHeight
+                || dialog.width < dialog.minimumDialogWidth)
+        {
+            return Math.min(dialog.height/dialog.minimumDialogHeight,
+                            dialog.width/dialog.minimumDialogWidth);
         }
         return 1.0;
     }
     function getGoldenMin(size) {
-        return size*514229.0/832040.0;
+        return size * 514229.0 / 832040.0;
     }
-
     function getGoldenMax(size) {
-        return size*1.618033988749;
+        return size * 1.618033988749;
     }
-    // -------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    /* Системные методы ввода */
-    // Ввести символ
+    // Системные методы ввода
+    /* to enter character */
     function putSymbol(sym) {
-        if(isBtSymbolCorrect(sym)) {
-            if(value.length === 0 && sym === '.') value = "0";
-            if(value.length === 1 && value.charAt(0) === '0' && isNumericChar(sym)) {
-                value = value.substring(1);
+        if (isBtSymbolCorrect(sym)) {
+            if (dialog.value.length === 0 && sym === '.') {
+                dialog.value = "0";
             }
-            value = value + sym;
+            if (dialog.value.length === 1
+                    && dialog.value.charAt(0) === '0'
+                    && dialog.isNumericChar(sym))
+            {
+                dialog.value = dialog.value.substring(1);
+            }
+            dialog.value = dialog.value + sym;
         }
     }
-    // Стереть введенный символ
+    /* to erase the entered character */
     function backspSymbol() {
-        if(value.length === 0) return false;
-        var i = value.length-1;
-        value = value.substring(0,value.length-1);
+        if (dialog.value.length === 0)
+            return false;
+        const lastIndex = dialog.value.length - 1;
+        dialog.value = dialog.value.substring(0, lastIndex);
         return true;
     }
-    // Вставить число на ввод из буфера обмена
+    /* to paste a number to input from the clipboard */
     function pastValue() {
-        if(clipboardHelper.canPast()) {
-            var buffer = clipboardHelper.past();
-            var conv_text = toPosixTextValue(buffer);
-            var real_value = parseFloat(conv_text);
-            real_value = roundPlus(real_value, precision);
-            if(real_value >= minimumValue && real_value <= maximumValue) {
-                value = getAbsValueStr(real_value.toString());
-                flag_minus = (real_value < 0);
+        if (clipboardHelper.canPast()) {
+            const buffer = clipboardHelper.past();
+            const conv_text = dialog.toPosixTextValue(buffer);
+            let real_value = parseFloat(conv_text);
+            real_value = dialog.roundPlus(real_value, dialog.precision);
+            if (real_value >= dialog.minimumValue
+                    && real_value <= dialog.maximumValue)
+            {
+                dialog.value = dialog.getAbsValueStr(real_value.toString());
+                dialog.flag_minus = (real_value < 0);
             }
         }
     }
-    // Скопировать введенно число в буфера обмена (или старое число если ничего не введено)
+    /* to copy the entered number to the clipboard
+        (or the old number if nothing is entered) */
     function copyValue() {
-        if(value.length > 0) {
+        if (dialog.value.length > 0) {
             clipboardHelper.copy(displayText.text);
-        } else if(placeholderSafeValue.length > 0) {
+        } else if (placeholderSafeValue.length > 0) {
             clipboardHelper.copy(placeholderSafeValue);
         }
     }
-    // функция авто-выбора знака ввода по умолчанию (при показе панели)
+    /* to auto-selection of the input character by default
+        (when showing the panel) */
     function func_autoselect_flag_minus() {
-        if(minimumValue < 0 && maximumValue < 0) return true;
-        if(minimumValue < 0 && maximumValue >= 0) {
-            if(placeholderValue.length > 0) {
-                if(Math.floor(parseFloat(placeholderValue)) >= 0) return false;
-                else return true;
+        if (dialog.minimumValue < 0 && dialog.maximumValue < 0)
+            return true;
+        if (dialog.minimumValue < 0 && dialog.maximumValue >= 0) {
+            if (placeholderValue.length > 0) {
+                if (Math.floor(parseFloat(dialog.placeholderValue)) >= 0) {
+                    return false;
+                } else {
+                    return true;
+                }
             } else {
-                if(Math.abs(minimumValue*2/3) > maximumValue) return true;
-                else return false;
+                if (Math.abs(dialog.minimumValue * 2 / 3) > dialog.maximumValue) {
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
         return false;
     }
-    // Получить защищенный вариант старого значения (исключает некорректный ввод при нажатии кнопки '#' )
+    /* to get the protected version of the old value
+        (excludes incorrect input when pressing the '#' button) */
     function getPlaceholderValueSafe() {
-        if(placeholderValue.length > 0) {
-            var check_value = roundPlus(parseFloat(toPosixTextValue(placeholderValue)),precision)
-            //console.log(check_value)
-            // проверка на диапазон
-            if(isNaN(check_value)) return "";
-            if(!(check_value >= minimumValue && check_value <= maximumValue)) {
+        if (dialog.placeholderValue.length > 0) {
+            const checkValue = roundPlus(
+                                 parseFloat(toPosixTextValue(dialog.placeholderValue)),
+                                 dialog.precision);
+            // Range check:
+            if (isNaN(checkValue)) {
                 return "";
             }
-            // если проверка на диапазон прошла успешно то проверка на кратность (если включена)
-            if(enableSequenceGrid) {
-                var tmp_value = parseFloat(Number(check_value).toFixed(precision));
-                var valPr = parseInt((tmp_value*Math.pow(10,precision)).toFixed(0));
-                var valArgPr = parseInt((sequenceStep*Math.pow(10,precision)).toFixed(0));
-                if((valPr % valArgPr) !== 0) {
-                    return ""; // получившееся значение не кратно шагу последовательности!
+            if (!(checkValue >= dialog.minimumValue
+                  && checkValue <= dialog.maximumValue))
+            {
+                return "";
+            }
+            // If the range check was successful, then the multiplicity check of the sequence step (if enabled)
+            if (dialog.enableSequenceGrid) {
+                const tmp_value = parseFloat(Number(checkValue).toFixed(dialog.precision));
+                const valPr = parseInt((tmp_value * Math.pow(10, dialog.precision)).toFixed(0));
+                const valArgPr = parseInt((dialog.sequenceStep * Math.pow(10, dialog.precision)).toFixed(0));
+                if ((valPr % valArgPr) !== 0) {
+                    // Resulting value is not a multiple of the sequence step!
+                    return "";
                 }
             }
-            return toLocaleTextValue(check_value.toString());
+            return dialog.toLocaleTextValue(checkValue.toString());
         }
         return "";
     }
-    // Старое значение было со знаком '-'
+    /* the old value is negative */
     function isPlaceholderSigned() {
-        if(placeholderSafeValue.length > 1) {
-            if(placeholderSafeValue.charAt(0) === '-') return true;
+        if (dialog.placeholderSafeValue.length > 1) {
+            if (dialog.placeholderSafeValue.charAt(0) === '-') {
+                return true;
+            }
         }
         return false;
     }
-    // Проверка на диапазон
+    /* range check */
     function isNumberInLimits() {
-        var new_value_str = value;
-        var real_value = ((flag_minus) ? -1*parseFloat(new_value_str) : parseFloat(new_value_str)); // получение проверяемого числа
-        if(isNaN(real_value)) return false;
-        if(real_value > maximumValue || real_value < minimumValue) return false;
+        const new_value_str = dialog.value;
+        const real_value = ((dialog.flag_minus) ?
+                              (-1) * parseFloat(new_value_str)
+                            : parseFloat(new_value_str)); // checked number
+        if (isNaN(real_value)) {
+            return false;
+        }
+        if (real_value > dialog.maximumValue
+                || real_value < dialog.minimumValue)
+        {
+            return false;
+        }
         return true;
     }
-    // Метод блокировки управляющих кнопок ввода (с предсказанием)
+    /* method of blocking control input buttons (predictive) */
     function isBtSymbolCorrect(symbols) {
-        var result = false;
-        switch(symbols) {
-        // Alg 1. - проверка на диапазон, точность и кратность
+        let result = false;
+        switch (symbols) {
+        // Alg 1. - check for range, precision and multiplicity
         case '0':
         case '1':
         case '2':
@@ -235,71 +290,87 @@ Item {
         case '7':
         case '8':
         case '9':
-            if(value.length > 0) {
-                if(value.length > 2) {
-                    // проверка на то что вводим целую часть
-                    var index_pointer = value.indexOf('.');
-                    //console.log(index_pointer)
-                    if(~index_pointer) {
-                        // символ найден, значит вводим дробную часть
-                        var fraction_precision_fact = (value.substring(index_pointer)).length-1; // фактическая точность по текущему вводу числа
-                        // проверка на точность
-                        if((fraction_precision_fact+1) > precision) {
-                            // точность не соблюдена!
+            if (dialog.value.length > 0) {
+                if (dialog.value.length > 2) {
+                    // verification of the fact that we introduce the integer part
+                    const indexDecSeparator2 = dialog.value.indexOf('.');
+                    if (~indexDecSeparator2) {
+                        // the symbol is found, so we enter the fractional part
+                        const fractionPrecisionFact = (dialog.value.substring(indexDecSeparator2)).length - 1;
+                        // precision check
+                        if ((fractionPrecisionFact + 1) > dialog.precision) {
+                            // precision is not observed!
                             break;
                         }
                     }
                 }
-                // проверка на диапазон
-                var new_value_str = value + symbols;
-                var real_value = ((flag_minus) ? -1*parseFloat(new_value_str) : parseFloat(new_value_str)); // получение проверяемого числа
-                if(isNaN(real_value)) break;
-                if(real_value <= maximumValue) {
+                const new_value_str = dialog.value + symbols;
+                const real_value = ((dialog.flag_minus) ?
+                                        (-1) * parseFloat(new_value_str)
+                                      : parseFloat(new_value_str)); // checked number
+                if (isNaN(real_value)) {
+                    break;
+                }
+                if (real_value <= dialog.maximumValue) {
                     result = true;
-                } else break;
-                // если проверка на диапазон прошла успешно то проверка на кратность (если включена)
-                if(enableSequenceGrid) {
-                    if(!isNumberInSequenceGrid(real_value,precision)) {
-                        result = false; // получившееся значение не кратно шагу последовательности!
+                } else {
+                    break;
+                }
+                // Range check
+                // If the range check was successful, then the multiplicity check (if enabled)
+                if (dialog.enableSequenceGrid) {
+                    if (!dialog.isNumberInSequenceGrid(real_value, dialog.precision)) {
+                        // the resulting value is not a multiple of the sequence step!
+                        result = false;
                     }
                 }
             } else {
-                // проверка на одиночный символ
-                // проверка на диапазон
-                var real_value_1s = ((flag_minus) ? -1*parseFloat(symbols+".0") : parseFloat(symbols+".0")); // получение проверяемого числа
-                if(isNaN(real_value_1s)) break;
-                if(real_value_1s <= maximumValue) {
+                // Single character check
+                const real_value_1s = ((dialog.flag_minus) ?
+                                         (-1) * parseFloat(symbols + ".0")
+                                       : parseFloat(symbols + ".0")); // checked number
+                if (isNaN(real_value_1s)) {
+                    break;
+                }
+                if (real_value_1s <= dialog.maximumValue) {
                     result = true;
-                } else break;
-                // если проверка на диапазон прошла успешно то проверка на кратность (если включена)
-                if(enableSequenceGrid) {
-                    if(!isNumberInSequenceGrid(real_value_1s,precision)) {
-                        result = false; // получившееся значение не кратно шагу последовательности!
+                } else {
+                    break;
+                }
+                // Range check
+                // If the range check was successful, then the multiplicity check (if enabled)
+                if (dialog.enableSequenceGrid) {
+                    if (!dialog.isNumberInSequenceGrid(real_value_1s, dialog.precision)) {
+                        // the resulting value is not a multiple of the sequence step!
+                        result = false;
                     }
                 }
             }
             break;
         // Alg 2.
         case '.':
-            if(precision <= 0) break;
-            if(value.length > 0) {
-                var index_pointer_2 = value.indexOf('.');
-                if(~index_pointer_2) {
-                    // символ найден, второй не нужен!
+            if (dialog.precision <= 0) {
+                break;
+            }
+            if (dialog.value.length > 0) {
+                const indexDecSeparator = value.indexOf('.');
+                if (~indexDecSeparator) {
+                    // the symbol is found, the second is not needed!
                     break;
                 } else {
-                    // исключать точку в граничных значениях!
-                    if(!isAddsPutDoteInLimitAtRange()) {
-                        // входит в диапазон и не является граничным -> ввод точки
+                    // exclude a point in the boundary values!
+                    if (!dialog.isAddsPutDoteInLimitAtRange()) {
+                        // enters the range and is not boundary -> point input
                         result = true;
                     }
                 }
             } else {
-                // входит ли 0 в диапазон
-                if(0 >= minimumValue && 0 <= maximumValue) {
-                    // исключать точку в граничных значениях!
-                    if(!isAddsPutDoteInLimitAtRange()) {
-                        // 0.0 входит в диапазон и не является граничным -> ввод точки с подстановкой символа '0' перед точкой
+                // checking zero is in range
+                if (0.0 >= dialog.minimumValue && 0.0 <= dialog.maximumValue) {
+                    // exclude a point in the boundary values!
+                    if (!dialog.isAddsPutDoteInLimitAtRange()) {
+                        // 0.0 is in the range and is not a boundary
+                        // -> enter point with a wildcard '0' in front of point
                         result = true;
                     }
                 }
@@ -307,143 +378,162 @@ Item {
             break;
         // Alg 3.
         case '-':
-            if(minimumValue >= 0) result = false;
-            else if(value.length > 0) {
-                var real_value_3 = -1*parseFloat(value); // получение проверяемого числа
-                if(real_value_3 === 0) {
-                    //break;
-                    if(0 === minimumValue || 0 === maximumValue) break;
+            if (dialog.minimumValue >= 0) {
+                result = false;
+            } else if (dialog.value.length > 0) {
+                const realValue3 = (-1) * parseFloat(dialog.value); // checked number
+                if (realValue3 === 0) {
+                    if (0 === dialog.minimumValue
+                            || 0 === dialog.maximumValue)
+                    {
+                        break;
+                    }
                 }
-                // проверка на диапазон
-                if(real_value_3 <= maximumValue) {
+                // range check
+                if (realValue3 <= dialog.maximumValue) {
                     result = true;
-                } else break;
+                } else {
+                    break;
+                }
             }
             break;
         // Alg 4.
         case '#':
-            if(placeholderValue.length > 0) result = true;
+            if (dialog.placeholderValue.length > 0)
+                result = true;
             break;
         // Alg 5.
         case 'C':
-            if(value.length > 0) result = true;
+            if (dialog.value.length > 0)
+                result = true;
             break;
         // Alg 6.
         case '<':
-            if(value.length > 0) result = true;
+            if (dialog.value.length > 0)
+                result = true;
             break;
         }
         return result;
     }
-    // -------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    /* Системные вспомогательные методы */
-    // функция проверки, что введеное значение отлично от старого
+    // System Helper Methods
+    /* checking that the entered value is different from the old one */
     function isPlaceholderEqual() {
         return (dialog.displayValue === dialog.placeholderValue);
     }
-    // Получить строку числа со знаком
+    /* get signed number string */
     function getValueStr(arg) {
-        var valueStr;
-        var countD = 0;
-        valueStr = ((!flag_minus) ? arg : ("-"+arg));
-        if(decimals > 0 && minimumValue >= 0) {
-            var i;
-            for(i=0; i<valueStr.length; i++) {
-                if(isNumericChar(valueStr[i])) {
+        let valueStr = ((!dialog.flag_minus) ? arg : ("-" + arg));
+        let countD = 0;
+        if (dialog.decimals > 0 && dialog.minimumValue >= 0) {
+            let i;
+            for (i = 0; i < valueStr.length; i++) {
+                if (dialog.isNumericChar(valueStr[i])) {
                     countD += 1;
-                } else break;
+                } else {
+                    break;
+                }
             }
-            for(i=0; i<(decimals-countD); i++) {
+            for (i = 0; i < (dialog.decimals - countD); i++) {
                 valueStr = "0" + valueStr;
             }
         }
-        return valueStr; //((!flag_minus) ? arg : ("-"+arg));
+        return valueStr;
     }
-    // Получить строку числа без знака
+    /* get an unsigned number string */
     function getAbsValueStr(arg) {
-        if(arg.length > 1) {
-            if(arg.charAt(0) === '-') {
+        if (arg.length > 1) {
+            if (arg.charAt(0) === '-') {
                 return arg.substr(1);
             }
         }
         return arg;
     }
-    // Получить символ разделителя целого числа от дробного в локализации среды
+    /* Get integer separator character from fractional in environment localization */
     function getSystemLocaleDecimalChar() {
         return Qt.locale("").decimalPoint;
     }
-    // Преобразование числовой строки в формат posix (для преобразований с помощью javascript)
+    /* Convert numeric string to posix format (for javascript conversions) */
     function toPosixTextValue(arg) {
-        var doteSymbol = getSystemLocaleDecimalChar();
-        var strValue = arg;
-        if(doteSymbol !== '.') {
-            if(strValue.length > 0)
-                strValue = strValue.replace(doteSymbol,'.')
+        const doteSymbol = dialog.getSystemLocaleDecimalChar();
+        let strValue = arg;
+        if (doteSymbol !== '.') {
+            if (strValue.length > 0) {
+                strValue = strValue.replace(doteSymbol, '.');
+            }
         }
         return strValue;
     }
-    // Преобразование числовой строки в формат локализации среды (для отображения)
+    /* Convert numeric string to environment localization format (for display) */
     function toLocaleTextValue(arg) {
-        var doteSymbol = getSystemLocaleDecimalChar();
-        var strValue = arg;
-        if(doteSymbol !== '.') {
+        const doteSymbol = dialog.getSystemLocaleDecimalChar();
+        let strValue = arg;
+        if (doteSymbol !== '.') {
             strValue = strValue.replace('.', doteSymbol)
         } else {
             strValue = strValue.replace(',', doteSymbol)
         }
-        //console.log(strValue)
         return strValue;
     }
-    // Символ является числом
+    /* symbol is a number */
     function isNumericChar(sym) {
         if (sym >= '0' && sym <= '9') {
             return true;
         }
         return false;
     }
-    // Округление до точности
-    function roundPlus(x, n) { //x - число, n - количество знаков
-      var m = Math.pow(10,n);
-      return Math.round(x*m)/m;
+    /* rounding to precision
+        x - number, n - number of characters */
+    function roundPlus(x, n) {
+      const m = Math.pow(10, n);
+      return Math.round(x * m) / m;
     }
-    // Проверка числа на кратность числу шага последовательности с точностью
-    function isNumberInSequenceGrid(real_value, precision) {
-        if(isNaN(real_value)) return false;
-        var tmp_value = roundPlus(real_value,precision);
-        var valPr = parseInt((tmp_value*Math.pow(10,precision)).toFixed(0));
-        var valArgPr = parseInt((sequenceStep*Math.pow(10,precision)).toFixed(0));
+    /* checking a number for a multiple of the number of steps
+        in a sequence with precision */
+    function isNumberInSequenceGrid(real_value, precision_arg) {
+        if (isNaN(real_value))
+            return false;
+        const tmp_value = roundPlus(real_value, precision_arg);
+        const valPr = parseInt((tmp_value * Math.pow(10, precision_arg)).toFixed(0));
+        const valArgPr = parseInt((dialog.sequenceStep * Math.pow(10, precision_arg)).toFixed(0));
         if((valPr % valArgPr) === 0) {
-            return true; // значение кратно шагу последовательности!
+            return true; // the value is a multiple of the sequence step!
         }
         return false;
     }
-    // Проверка факта ввода точки на границах диапазона ввода
+    /* checking whether a point has been entered at the boundaries
+        of an input range */
     function isAddsPutDoteInLimitAtRange() {
-        var tmp_value;
-        if(value.length > 0) {
-            tmp_value = ((flag_minus) ? -1*parseInt(value) : parseInt(value));
+        let tmp_value;
+        if (dialog.value.length > 0) {
+            tmp_value = ((dialog.flag_minus) ?
+                             (-1) * parseInt(dialog.value)
+                           : parseInt(dialog.value));
         } else {
-            if(0 >= maximumValue) {
-                return true; // чтобы исключить ввод точки, если ничего не введено, и ноль по умолчанию для подстановки не входит в диапазон
+            if (0 >= dialog.maximumValue) {
+                // to exclude period from being entered if nothing is entered
+                // and the default zero for substitution is not in the range
+                return true;
             }
             tmp_value = 0;
         }
-        var check_value_str = tmp_value+".0";
-        var check_value = roundPlus(parseFloat(check_value_str), precision);
-        if(!flag_minus) {
-            if(check_value >= maximumValue) {
+        const check_value_str = tmp_value + ".0";
+        var check_value = dialog.roundPlus(parseFloat(check_value_str), dialog.precision);
+        if (!dialog.flag_minus) {
+            if (check_value >= dialog.maximumValue) {
                 return true
             }
         } else {
-            if(check_value <= minimumValue) {
+            if (check_value <= dialog.minimumValue) {
                 return true
             }
         }
         return false
     }
-    // -------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
+    // Clipboard buffer
     Item {
         id: clipboardHelper
         opacity: 0
@@ -475,8 +565,9 @@ Item {
             text: ""
         }
     }
+
+    // Shadow
     Rectangle {
-        // Тень
         id: dialogMsgShadow
         visible: dialogPanel.visible
         anchors.fill: parent
@@ -486,11 +577,12 @@ Item {
             anchors.fill: parent
         }
     }
+
+    // Input Dialog Box
     Rectangle {
-        // Диалоговое окно ввода
         id: dialogPanel
         anchors.centerIn: parent
-        scale: fixScale()
+        scale: dialog.fixScale()
         height: 455
         width: 600
         visible: false
@@ -498,27 +590,26 @@ Item {
         color: "#f1eee0"
         focus: true
         onVisibleChanged: {
-            if(visible === true) {
+            if (visible === true) {
                 Keys.enabled = true
             }
             dialogPanel.forceActiveFocus()
         }
-
         Menu {
             id: serviceMenu
             MenuItem {
-                text: "Копировать"
-                enabled: (value.length > 0) || (placeholderSafeValue.length > 0)
+                text: qsTr("Copy")
+                enabled: ((dialog.value.length > 0) || (dialog.placeholderSafeValue.length > 0))
                 onTriggered: {
-                    copyValue();
+                    dialog.copyValue();
                     dialogPanel.forceActiveFocus()
                 }
             }
             MenuItem {
-                text: "Вставить"
+                text: qsTr("Paste")
                 enabled: clipboardHelper.canPast()
                 onTriggered: {
-                    pastValue();
+                    dialog.pastValue();
                     dialogPanel.forceActiveFocus()
                 }
             }
@@ -537,14 +628,15 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             Row {
                 id: rowLabelPanel
-                height: 0.1*contentDialogPanel.height
+                height: 0.1 * contentDialogPanel.height
                 width: parent.width
                 spacing: 0
-                // Область заголовка
+
+                // Title area
                 Label {
                     id: labelDialog
                     width: parent.width
-                    height: 0.1*contentDialogPanel.height
+                    height: 0.1 * contentDialogPanel.height
                     color: "black"
                     text: label
                     verticalAlignment: Text.AlignVCenter
@@ -558,35 +650,36 @@ Item {
                 width: contentDialogPanel.width
                 height: contentDialogPanel.height*0.15
                 Layout.alignment: Qt.AlignHCenter
-                // Область индикатора ввода
+
+                // Input indicator area
                 Rectangle {
                     id: displayTextDisplay
-                    color: trigger_copy ? Qt.darker(displayBackground, 1.5) : displayBackground
+                    color: trigger_copy ? Qt.darker(dialog.displayBackground, 1.5) : dialog.displayBackground
                     border.color: Qt.darker(color, 2)
-                    implicitHeight: contentDialogPanel.height*0.15
-                    implicitWidth: contentDialogPanel.width-2
+                    implicitHeight: contentDialogPanel.height * 0.15
+                    implicitWidth: contentDialogPanel.width - 2
                     Text {
                         id: displayText
                         anchors.fill: parent
                         verticalAlignment: "AlignVCenter"
                         horizontalAlignment: "AlignHCenter"
-                        text: dialog.value.length > 0 ? displayValue + measurement : placeholderValue + measurement
-                        color: dialog.value.length > 0 ? displayTextColor : displayPlaceholderTextColor
-                        font.pixelSize: displayTextDisplay.height*0.65
+                        text: dialog.value.length > 0 ? dialog.displayValue + dialog.measurement : dialog.placeholderValue + dialog.measurement
+                        color: dialog.value.length > 0 ? dialog.displayTextColor : dialog.displayPlaceholderTextColor
+                        font.pixelSize: displayTextDisplay.height * 0.65
                     }
                     MouseArea {
                         anchors.fill: parent
                         acceptedButtons: Qt.RightButton | Qt.LeftButton
                         onPressAndHold: {
-                            serviceMenu.x = textArea.mouseX
-                            serviceMenu.y = textArea.mouseY
-                            serviceMenu.open()
+                            serviceMenu.x = textArea.mouseX;
+                            serviceMenu.y = textArea.mouseY;
+                            serviceMenu.open();
                         }
                         onClicked: {
                             if(mouse.button === Qt.RightButton) {
-                                serviceMenu.x = textArea.mouseX
-                                serviceMenu.y = textArea.mouseY
-                                serviceMenu.open()
+                                serviceMenu.x = textArea.mouseX;
+                                serviceMenu.y = textArea.mouseY;
+                                serviceMenu.open();
                             }
                         }
 
@@ -600,513 +693,510 @@ Item {
                 rows: 5
                 antialiasing: true
                 Layout.alignment: Qt.AlignHCenter
-                width: contentDialogPanel.width+2
-                height: contentDialogPanel.height*0.625
+                width: contentDialogPanel.width + 2
+                height: contentDialogPanel.height * 0.625
                 spacing: -1
                 ButtonKey {
                     id: areaCClearFront
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.3333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.3333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
                     text: "#"
                     state: trigger_ftsp ? "on" : "off"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_ftsp = true
+                        trigger_ftsp = true;
                     }
                     onReleased: {
-                        if(value.length > 0) {
-                            clear();
-                            flag_minus = func_autoselect_flag_minus();
+                        if (dialog.value.length > 0) {
+                            dialog.clear();
+                            dialog.flag_minus = dialog.func_autoselect_flag_minus();
                         } else {
-                            value = getAbsValueStr(toPosixTextValue(placeholderSafeValue));
-                            flag_minus = isPlaceholderSigned();
+                            dialog.value = dialog.getAbsValueStr(toPosixTextValue(placeholderSafeValue));
+                            dialog.flag_minus = dialog.isPlaceholderSigned();
                         }
-                        trigger_ftsp = false
-                        trigger_clear = false
+                        trigger_ftsp = false;
+                        trigger_clear = false;
                     }
                 }
                 ButtonKey {
                     id: areaCClear
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.3333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.3333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
                     text: "C"
-                    state: isBtSymbolCorrect('C') ? (trigger_clear ? "on" : "off") : "dimmed"
+                    state: dialog.isBtSymbolCorrect('C') ?
+                               (trigger_clear ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_clear = true
+                        trigger_clear = true;
                     }
                     onReleased: {
-                        trigger_clear = false
-                        clear();
-                        flag_minus = func_autoselect_flag_minus()
+                        trigger_clear = false;
+                        dialog.clear();
+                        dialog.flag_minus = dialog.func_autoselect_flag_minus();
                     }
                 }
                 ButtonKey {
                     id: areaCClearBack
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.3333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.3333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
                     text: "<-"
-                    state: isBtSymbolCorrect('<') ? (trigger_bksp ? "on" : "off") : "dimmed"
+                    state: dialog.isBtSymbolCorrect('<') ?
+                               (trigger_bksp ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
                         trigger_bksp = true
                     }
                     onReleased: {
-                        trigger_bksp = false
-                        backspSymbol();
-                        if(value.length === 0) {
-                            flag_minus = func_autoselect_flag_minus()
+                        trigger_bksp = false;
+                        dialog.backspSymbol();
+                        if (dialog.value.length === 0) {
+                            flag_minus = dialog.func_autoselect_flag_minus();
                         }
                     }
                 }
                 ButtonKey {
                     id: areaC7
                     text: "7"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('7') ? (trigger_7 ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('7') ?
+                               (trigger_7 ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_7 = true
+                        trigger_7 = true;
                     }
                     onReleased: {
-                        trigger_7 = false
-                        putSymbol('7');
+                        trigger_7 = false;
+                        dialog.putSymbol('7');
                     }
                 }
                 ButtonKey {
                     id: areaC8
                     text: "8"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('8') ? (trigger_8 ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('8') ?
+                               (trigger_8 ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_8 = true
+                        trigger_8 = true;
                     }
                     onReleased: {
-                        trigger_8 = false
-                        putSymbol('8');
+                        trigger_8 = false;
+                        dialog.putSymbol('8');
                     }
                 }
                 ButtonKey {
                     id: areaC9
                     text: "9"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('9') ? (trigger_9 ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('9') ?
+                               (trigger_9 ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_9 = true
+                        trigger_9 = true;
                     }
                     onReleased: {
-                        trigger_9 = false
-                        putSymbol('9');
+                        trigger_9 = false;
+                        dialog.putSymbol('9');
                     }
                 }
                 ButtonKey {
                     id: areaC4
                     text: "4"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('4') ? (trigger_4 ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('4') ?
+                               (trigger_4 ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_4 = true
+                        trigger_4 = true;
                     }
                     onReleased: {
-                        trigger_4 = false
-                        putSymbol('4');
+                        trigger_4 = false;
+                        dialog.putSymbol('4');
                     }
                 }
                 ButtonKey {
                     id: areaC5
                     text: "5"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('5') ? (trigger_5 ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('5') ?
+                               (trigger_5 ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_5 = true
+                        trigger_5 = true;
                     }
                     onReleased: {
-                        trigger_5 = false
-                        putSymbol('5');
+                        trigger_5 = false;
+                        dialog.putSymbol('5');
                     }
                 }
                 ButtonKey {
                     id: areaC6
                     text: "6"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('6') ? (trigger_6 ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('6') ?
+                               (trigger_6 ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_6 = true
+                        trigger_6 = true;
                     }
                     onReleased: {
-                        trigger_6 = false
-                        putSymbol('6');
+                        trigger_6 = false;
+                        dialog.putSymbol('6');
                     }
                 }
                 ButtonKey {
                     id: areaC1
                     text: "1"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('1') ? (trigger_1 ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('1') ?
+                               (trigger_1 ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_1 = true
+                        trigger_1 = true;
                     }
                     onReleased: {
-                        trigger_1 = false
-                        putSymbol('1');
+                        trigger_1 = false;
+                        dialog.putSymbol('1');
                     }
                 }
                 ButtonKey {
                     id: areaC2
                     text: "2"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('2') ? (trigger_2 ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('2') ?
+                               (trigger_2 ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_2 = true
+                        trigger_2 = true;
                     }
                     onReleased: {
-                        trigger_2 = false
-                        putSymbol('2');
+                        trigger_2 = false;
+                        dialog.putSymbol('2');
                     }
                 }
                 ButtonKey {
                     id: areaC3
                     text: "3"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('3') ? (trigger_3 ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('3') ?
+                               (trigger_3 ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_3 = true
+                        trigger_3 = true;
                     }
                     onReleased: {
-                        trigger_3 = false
-                        putSymbol('3');
+                        trigger_3 = false;
+                        dialog.putSymbol('3');
                     }
                 }
                 ButtonKey {
                     id: areaC0
                     text: "0"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('0') ? (trigger_0 ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('0') ?
+                               (trigger_0 ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_0 = true
+                        trigger_0 = true;
                     }
                     onReleased: {
-                        trigger_0 = false
-                        putSymbol('0');
+                        trigger_0 = false;
+                        dialog.putSymbol('0');
                     }
                 }
                 ButtonKey {
                     id: areaCDote
-                    text: getSystemLocaleDecimalChar()//"."
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('.') ? (trigger_dote ? "on" : "off") : "dimmed"
+                    text: dialog.getSystemLocaleDecimalChar() // "." or ","
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('.') ?
+                               (trigger_dote ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_dote = true
+                        trigger_dote = true;
                     }
                     onReleased: {
-                        trigger_dote = false
-                        putSymbol('.');
+                        trigger_dote = false;
+                        dialog.putSymbol('.');
                     }
                 }
                 ButtonKey {
                     id: areaCMinus
                     text: "+/-"
-                    height: 0.125*contentDialogPanel.height
-                    width: 0.333333*contentDialogPanel.width
-                    colorOn: buttonsColorsOn
-                    colorOff: buttonsColorsOff
-                    colorDimmed: buttonsColorsDimmed
-                    textColorOff: buttonsTextColorsOff
-                    textColorOn: buttonsTextColorsOn
-                    state: isBtSymbolCorrect('-') ? (trigger_minus ? "on" : "off") : "dimmed"
+                    height: 0.125 * contentDialogPanel.height
+                    width: 0.333333 * contentDialogPanel.width
+                    colorOn: dialog.buttonsColorsOn
+                    colorOff: dialog.buttonsColorsOff
+                    colorDimmed: dialog.buttonsColorsDimmed
+                    textColorOff: dialog.buttonsTextColorsOff
+                    textColorOn: dialog.buttonsTextColorsOn
+                    state: dialog.isBtSymbolCorrect('-') ?
+                               (trigger_minus ? "on" : "off")
+                             : "dimmed"
                     enableOnPressIndicate: false
                     onPressed: {
-                        trigger_minus = true
+                        trigger_minus = true;
                     }
                     onReleased: {
                         trigger_minus = false;
-                        flag_minus = !flag_minus;
+                        dialog.flag_minus = !dialog.flag_minus;
                     }
                 }
             }
             RowLayout {
                 id: rowFinishEditButtons
-                height: 0.125*contentDialogPanel.height
-                width: contentDialogPanel.width+1
+                height: 0.125 * contentDialogPanel.height
+                width: contentDialogPanel.width + 1
                 spacing: -1
                 Layout.alignment: Qt.AlignHCenter
                 ButtonDlg {
                     id: btOK
-                    property bool allow: isNumberInLimits()
-                    color: buttonsColorDlgOn
-                    backgroundColorOn: buttonsColorDlgOn
-                    backgroundColorOff: buttonsColorDlgOff
-                    textColor: buttonsTextColorDlg
-                    textColorOff: buttonsTextColorDlgOff
-                    textColorOn: buttonsColorDlgOn
-                    text: textBtOK
+                    property bool allow: dialog.isNumberInLimits()
+                    color: dialog.buttonsColorDlgOn
+                    backgroundColorOn: dialog.buttonsColorDlgOn
+                    backgroundColorOff: dialog.buttonsColorDlgOff
+                    textColor: dialog.buttonsTextColorDlg
+                    textColorOff: dialog.buttonsTextColorDlgOff
+                    textColorOn: dialog.buttonsColorDlgOn
+                    text: dialog.textBtOK
                     height: parent.height
-                    width: parent.width/2
-                    enabled: (value.length > 0) && allow
+                    width: parent.width / 2
+                    enabled: (dialog.value.length > 0) && allow
                     onClicked: {
-                        dialog.ok(getValueStr(value), isPlaceholderEqual());
-                        hide();
+                        dialog.ok(dialog.getValueStr(value),
+                                  dialog.isPlaceholderEqual());
+                        dialog.hide();
                     }
                 }
                 ButtonDlg {
                     id: btCancel
-                    color: buttonsColorDlgOn
-                    backgroundColorOn: buttonsColorDlgOn
-                    backgroundColorOff: buttonsColorDlgOff
-                    textColor: buttonsTextColorDlg
-                    textColorOff: buttonsTextColorDlgOff
-                    textColorOn: buttonsColorDlgOn
-                    text: textBtCancel
+                    color: dialog.buttonsColorDlgOn
+                    backgroundColorOn: dialog.buttonsColorDlgOn
+                    backgroundColorOff: dialog.buttonsColorDlgOff
+                    textColor: dialog.buttonsTextColorDlg
+                    textColorOff: dialog.buttonsTextColorDlgOff
+                    textColorOn: dialog.buttonsColorDlgOn
+                    text: dialog.textBtCancel
                     height: parent.height
-                    width: parent.width/2
+                    width: parent.width / 2
                     onClicked: {
                         dialog.cancel()
-                        hide();
+                        dialog.hide();
                     }
                 }
             }
         }
         Keys.onPressed: {
-            //console.log("Key "+/*String.fromCharCode*/(event.key)+" pressed")
-            if(event.key === Qt.Key_C && event.modifiers === Qt.ControlModifier) {
-                // Копирование по сочетанию CTRL+C
+            if (event.key === Qt.Key_C && event.modifiers === Qt.ControlModifier) {
+                // Copy by CTRL + C
                 trigger_copy = true;
-                copyValue();
-            }
-            else if(event.key === Qt.Key_V && event.modifiers === Qt.ControlModifier) {
-                // Вставка по сочетанию CTRL+V
-                pastValue();
-            }
-            else if(event.key === Qt.Key_0) {
-                trigger_0 = true
-            }
-            else if(event.key === Qt.Key_1) {
-                trigger_1 = true
-            }
-            else if(event.key === Qt.Key_2) {
-                trigger_2 = true
-            }
-            else if(event.key === Qt.Key_3) {
-                trigger_3 = true
-            }
-            else if(event.key === Qt.Key_4) {
-                trigger_4 = true
-            }
-            else if(event.key === Qt.Key_5) {
-                trigger_5 = true
-            }
-            else if(event.key === Qt.Key_6) {
-                trigger_6 = true
-            }
-            else if(event.key === Qt.Key_7) {
-                trigger_7 = true
-            }
-            else if(event.key === Qt.Key_8) {
-                trigger_8 = true
-            }
-            else if(event.key === Qt.Key_9) {
-                trigger_9 = true
-            }
-            else if(event.key === 46 || event.key === 44) { // '.'
-                trigger_dote = true
-            }
-            else if(event.key === 45) { // '-'
-                trigger_minus = true
-            }
-            else if(event.key === Qt.Key_Backspace) {
-                trigger_bksp = true
-            }
-            else if(event.key === Qt.Key_Delete) {
-                trigger_ftsp = true
-            }
-            else if((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && btOK.enabled ) {
-                dialog.ok(getValueStr(value), isPlaceholderEqual());
-                hide();
-            }
-            else if(event.key === Qt.Key_Space) {
-                if(value.length > 0) {
-                    trigger_clear = true
+                dialog.copyValue();
+            } else if(event.key === Qt.Key_V && event.modifiers === Qt.ControlModifier) {
+                // Paste by CTRL + V
+                dialog.pastValue();
+            } else if (event.key === Qt.Key_0) {
+                trigger_0 = true;
+            } else if (event.key === Qt.Key_1) {
+                trigger_1 = true;
+            } else if (event.key === Qt.Key_2) {
+                trigger_2 = true;
+            } else if (event.key === Qt.Key_3) {
+                trigger_3 = true;
+            } else if (event.key === Qt.Key_4) {
+                trigger_4 = true;
+            } else if (event.key === Qt.Key_5) {
+                trigger_5 = true;
+            } else if (event.key === Qt.Key_6) {
+                trigger_6 = true;
+            } else if (event.key === Qt.Key_7) {
+                trigger_7 = true;
+            } else if (event.key === Qt.Key_8) {
+                trigger_8 = true;
+            } else if (event.key === Qt.Key_9) {
+                trigger_9 = true;
+            } else if (event.key === 46 || event.key === 44) {
+                // '.' or ','
+                trigger_dote = true;
+            } else if (event.key === 45) {
+                // '-'
+                trigger_minus = true;
+            } else if (event.key === Qt.Key_Backspace) {
+                trigger_bksp = true;
+            } else if (event.key === Qt.Key_Delete) {
+                trigger_ftsp = true;
+            } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && btOK.enabled ) {
+                dialog.ok(dialog.getValueStr(value), dialog.isPlaceholderEqual());
+                dialog.hide();
+            } else if (event.key === Qt.Key_Space) {
+                if (dialog.value.length > 0) {
+                    trigger_clear = true;
                 } else {
-                    trigger_ftsp = true
+                    trigger_ftsp = true;
                 }
             }
         }
         Keys.onReleased: {
-            if(event.key === Qt.Key_C && event.modifiers === Qt.ControlModifier) {
+            if (event.key === Qt.Key_C && event.modifiers === Qt.ControlModifier) {
                 trigger_copy = false;
                 copyValue();
-            }
-            else if(event.key === Qt.Key_0) {
-                trigger_0 = false
-                putSymbol('0')
-            }
-            else if(event.key === Qt.Key_1) {
-                trigger_1 = false
-                putSymbol('1')
-            }
-            else if(event.key === Qt.Key_2) {
-                trigger_2 = false
-                putSymbol('2')
-            }
-            else if(event.key === Qt.Key_3) {
-                trigger_3 = false
-                putSymbol('3')
-            }
-            else if(event.key === Qt.Key_4) {
-                trigger_4 = false
-                putSymbol('4')
-            }
-            else if(event.key === Qt.Key_5) {
-                trigger_5 = false
-                putSymbol('5')
-            }
-            else if(event.key === Qt.Key_6) {
-                trigger_6 = false
-                putSymbol('6')
-            }
-            else if(event.key === Qt.Key_7) {
-                trigger_7 = false
-                putSymbol('7')
-            }
-            else if(event.key === Qt.Key_8) {
-                trigger_8 = false
-                putSymbol('8')
-            }
-            else if(event.key === Qt.Key_9) {
-                trigger_9 = false
-                putSymbol('9')
-            }
-            else if(event.key === 46 || event.key === 44) {
-                trigger_dote = false
-                putSymbol('.')
-            }
-            else if(event.key === 45) {
-                if(isBtSymbolCorrect('-')) {
-                    trigger_minus = false
-                    flag_minus = !flag_minus;
+            } else if (event.key === Qt.Key_0) {
+                trigger_0 = false;
+                dialog.putSymbol('0');
+            } else if (event.key === Qt.Key_1) {
+                trigger_1 = false;
+                dialog.putSymbol('1');
+            } else if (event.key === Qt.Key_2) {
+                trigger_2 = false;
+                dialog.putSymbol('2');
+            } else if (event.key === Qt.Key_3) {
+                trigger_3 = false;
+                dialog.putSymbol('3');
+            } else if (event.key === Qt.Key_4) {
+                trigger_4 = false;
+                dialog.putSymbol('4');
+            } else if (event.key === Qt.Key_5) {
+                trigger_5 = false;
+                dialog.putSymbol('5');
+            } else if (event.key === Qt.Key_6) {
+                trigger_6 = false;
+                dialog.putSymbol('6');
+            } else if (event.key === Qt.Key_7) {
+                trigger_7 = false;
+                dialog.putSymbol('7');
+            } else if (event.key === Qt.Key_8) {
+                trigger_8 = false;
+                dialog.putSymbol('8');
+            } else if (event.key === Qt.Key_9) {
+                trigger_9 = false;
+                dialog.putSymbol('9');
+            } else if (event.key === 46 || event.key === 44) {
+                trigger_dote = false;
+                dialog.putSymbol('.');
+            } else if (event.key === 45) {
+                if (dialog.isBtSymbolCorrect('-')) {
+                    trigger_minus = false;
+                    dialog.flag_minus = !dialog.flag_minus;
                 }
-            }
-            else if(event.key === Qt.Key_Backspace) {
-                if(isBtSymbolCorrect('<')) {
-                    trigger_bksp = false
-                    backspSymbol();
-                    if(value.length === 0) {
-                        flag_minus = func_autoselect_flag_minus();
+            } else if (event.key === Qt.Key_Backspace) {
+                if (dialog.isBtSymbolCorrect('<')) {
+                    trigger_bksp = false;
+                    dialog.backspSymbol();
+                    if (dialog.value.length === 0) {
+                        dialog.flag_minus = func_autoselect_flag_minus();
                     }
                 }
-            }
-            else if(event.key === Qt.Key_Delete) {
-                if(isBtSymbolCorrect('C')) {
-                    trigger_ftsp = false
-                    clear();
-                    flag_minus = func_autoselect_flag_minus();
+            } else if (event.key === Qt.Key_Delete) {
+                if (dialog.isBtSymbolCorrect('C')) {
+                    trigger_ftsp = false;
+                    dialog.clear();
+                    dialog.flag_minus = dialog.func_autoselect_flag_minus();
                 }
-            }
-            else if(event.key === Qt.Key_Space) {
-                if(isBtSymbolCorrect('#')) {
-                    if(value.length > 0) {
-                        clear();
-                        flag_minus = func_autoselect_flag_minus();
+            } else if (event.key === Qt.Key_Space) {
+                if (dialog.isBtSymbolCorrect('#')) {
+                    if (dialog.value.length > 0) {
+                        dialog.clear();
+                        dialog.flag_minus = dialog.func_autoselect_flag_minus();
                     } else {
-                        value = getAbsValueStr(toPosixTextValue(placeholderSafeValue));
-                        flag_minus = isPlaceholderSigned();
+                        dialog.value = dialog.getAbsValueStr(dialog.toPosixTextValue(dialog.placeholderSafeValue));
+                        dialog.flag_minus = dialog.isPlaceholderSigned();
                     }
                 }
-                trigger_clear = false
-                trigger_ftsp = false
-            }
-            else {
+                trigger_clear = false;
+                trigger_ftsp = false;
+            } else {
                 trigger_1 = false;
                 trigger_2 = false;
                 trigger_3 = false;
@@ -1145,7 +1235,7 @@ Item {
     property bool trigger_copy: false
 
     onFocusChanged: {
-        if(!dialogPanel.focus) dialogPanel.forceActiveFocus()
+        if (!dialogPanel.focus)
+            dialogPanel.forceActiveFocus();
     }
-
 }

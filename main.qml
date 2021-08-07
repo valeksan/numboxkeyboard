@@ -5,12 +5,12 @@ Window {
     visible: true
     width: 640
     height: 480
-    title: qsTr("Пример ввода")
+    title: "Example"
     contentItem.antialiasing: true
 
     Text {
         id: title
-        text: "Нажмите на индикатор"
+        text: "Click on the indicator"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: 20
         anchors.top: parent.top
@@ -33,10 +33,10 @@ Window {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    if(!num_keyboard.isVisible()) {
-                        //num_keyboard.show(); // и так можно!
-                        //num_keyboard.show(1.8); // и так можно!
-                        num_keyboard.show(textEdit.text);
+                    if (!numKeyboard.isVisible()) {
+                        //numKeyboard.show(); // and so you can!
+                        //numKeyboard.show(1.8); and so you can!
+                        numKeyboard.show(textEdit.text);
                     }
                 }
             }
@@ -44,22 +44,22 @@ Window {
     }
 
     NumBoxKeyboard {
-        id: num_keyboard
-        minimumValue: 40
-        maximumValue: 300
-        precision: 0
+        id: numKeyboard
+        minimumValue: -5.5
+        maximumValue: 10.9
+        precision: 3
         decimals: 3
         antialiasing: true
         placeholderValue: textEdit.text
-        //enableSequenceGrid: true // если захочится пременить шаговую сетку
-        //sequenceStep: 0.004 // шаг сетки (любой)
+        //enableSequenceGrid: true // if you want to change the step grid
+        //sequenceStep: 0.004 // grid step (any)
         anchors.fill: parent
     }
 
     Connections {
-        target: num_keyboard
+        target: numKeyboard
         onOk: {
-            textEdit.text = number
+            textEdit.text = number;
         }
     }
 }

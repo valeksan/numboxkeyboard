@@ -2,17 +2,11 @@ import QtQuick 2.7
 
 Rectangle {
     id: button_border
-    width: 100
-    height: 50
 
     property string text: ""
     property string textOff: text
     property string textOn: text
 
-    //property color name: value
-    color: "#f7a363"
-    antialiasing: true
-    clip: true
     property color colorOff: color
     property color colorOn: Qt.lighter(color, 1.5)
     property color colorDimmed: Qt.darker(colorOff, 1.5)
@@ -36,42 +30,60 @@ Rectangle {
     signal pressed
     signal released
 
+    width: 100
+    height: 50
     state: "off"
+    color: "#f7a363"
+    antialiasing: true
+    clip: true
 
     function putColor() {
-        if(enableOnPressIndicate) {
-            if(trigger_press) {
-                switch(state) {
-                case "off": return colorOn;
-                case "on": return colorOff;
-                case "dimmed": return colorDimmed;
+        if (enableOnPressIndicate) {
+            if (trigger_press) {
+                switch (state) {
+                case "off":
+                    return colorOn;
+                case "on":
+                    return colorOff;
+                case "dimmed":
+                    return colorDimmed;
                 }
             } else {
-                switch(state) {
-                case "off": return colorOff;
-                case "on": return colorOn;
-                case "dimmed": return colorDimmed;
+                switch (state) {
+                case "off":
+                    return colorOff;
+                case "on":
+                    return colorOn;
+                case "dimmed":
+                    return colorDimmed;
                 }
             }
         } else {
-            switch(state) {
-            case "off": return colorOff;
-            case "on": return colorOn;
-            case "dimmed": return colorDimmed;
+            switch (state) {
+            case "off":
+                return colorOff;
+            case "on":
+                return colorOn;
+            case "dimmed":
+                return colorDimmed;
             }
         }
         return color;
     }
 
-    Rectangle
-    {
+    Rectangle {
         id: button
         anchors.centerIn: button_border
-        height: enableGradientBorder ? button_border.height - gradientBorderWidth : button_border.height
+        height: enableGradientBorder ?
+                    button_border.height - gradientBorderWidth
+                  : button_border.height
         color: putColor()
-        width: enableGradientBorder ? button_border.width - gradientBorderWidth : button_border.width
+        width: enableGradientBorder ?
+                   button_border.width - gradientBorderWidth
+                 : button_border.width
         radius: gradientBorder
         border.color: Qt.darker(color, 1.5)
+
         Text {
             id: button_state_text
             anchors.fill: parent
@@ -82,16 +94,19 @@ Rectangle {
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.WordWrap
         }
+
         MouseArea {
             anchors.fill: parent
             enabled: (button_border.state !== "dimmed")
-            onClicked: { button_border.clicked(); }
+            onClicked: {
+                button_border.clicked();
+            }
             onPressed: {
-                trigger_press = true
+                trigger_press = true;
                 button_border.pressed();
             }
             onReleased: {
-                trigger_press = false
+                trigger_press = false;
                 button_border.released();
             }
         }
