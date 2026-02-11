@@ -1,6 +1,6 @@
-import QtQuick 2.10
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Item {
     id: dialog
@@ -87,6 +87,7 @@ Item {
             numberStr = "";
         let tmpValue = numberStr ? dialog.getAbsValueStr(numberStr) : ""
         let countD = 0;
+        visible = true;
         dialogPanel.visible = true;
         if (tmpValue) {
             if (dialog.decimals > 0 && dialog.minimumValue >= 0) {
@@ -111,6 +112,7 @@ Item {
         dialogPanel.visible = false;
         dialog.flagCurrentValueSetted = false;
         dialog.value = "";
+        visible = false;
     }
     /* clear input */
     function clear() {
@@ -1079,7 +1081,7 @@ Item {
                 }
             }
         }
-        Keys.onPressed: {
+        Keys.onPressed: (event) => {
             if (event.key === Qt.Key_C && event.modifiers === Qt.ControlModifier) {
                 // Copy by CTRL + C
                 trigger_copy = true;
@@ -1128,7 +1130,7 @@ Item {
                 }
             }
         }
-        Keys.onReleased: {
+        Keys.onReleased: (event) => {
             if (event.key === Qt.Key_C && event.modifiers === Qt.ControlModifier) {
                 trigger_copy = false;
                 copyValue();
